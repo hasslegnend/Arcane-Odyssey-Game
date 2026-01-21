@@ -1,10 +1,11 @@
 local plr = game.Players.LocalPlayer
 local PlayerGui = plr.PlayerGui
 local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local padding = 5
 local buttonWidth = 200
-local buttonHeight = 40
+local buttonHeight = 30
 
 local PigeonGui = Instance.new("ScreenGui")
 PigeonGui.Parent = PlayerGui
@@ -22,6 +23,7 @@ PigeonFrame.BorderColor3 = Color3.fromRGB(0, 0, 139)
 PigeonFrame.Selectable = true
 PigeonFrame.Draggable = true
 
+-- Tabs
 local function createTab(name, position)
 	local tab = Instance.new("TextButton")
 	tab.Parent = PigeonFrame
@@ -39,6 +41,7 @@ local GeneralStuff = createTab("GENERAL", UDim2.new(0, padding, 0, padding))
 local GoodStuff    = createTab("GOOD STUFF", UDim2.new(1/3, padding, 0, padding))
 local MiscStuff    = createTab("MISC", UDim2.new(2/3, padding, 0, padding))
 
+-- Sections
 local function createSection()
 	local sec = Instance.new("Frame")
 	sec.Parent = PigeonFrame
@@ -50,11 +53,11 @@ local function createSection()
 end
 
 local GeneralSection = createSection()
-GeneralSection.Visible = true 
+GeneralSection.Visible = true
 local GoodSection    = createSection()
 local MiscSection    = createSection()
 
-
+-- Generic Button Creator
 local function addButton(section, name, color)
 	local button = Instance.new("TextButton")
 	button.Parent = section
@@ -65,7 +68,6 @@ local function addButton(section, name, color)
 	button.TextSize = 14
 	button.Text = name
 
-	
 	local index = 0
 	for _, c in pairs(section:GetChildren()) do
 		if c:IsA("TextButton") then
@@ -80,26 +82,21 @@ local function addButton(section, name, color)
 	return button
 end
 
-
-
 addButton(GoodSection, "Example Option")
 addButton(MiscSection, "Unload GUI", Color3.fromRGB(200,60,60)).MouseButton1Click:Connect(function()
 	PigeonGui:Destroy()
 end)
 
--- TAB SWITCHING WITH HIGHLIGHT
+-- TAB SWITCHING
 local function selectTab(tab)
-	-- reset all tab colors
 	GeneralStuff.TextColor3 = Color3.fromRGB(255,255,255)
 	GoodStuff.TextColor3    = Color3.fromRGB(255,255,255)
 	MiscStuff.TextColor3    = Color3.fromRGB(255,255,255)
 
-	-- hide all sections
 	GeneralSection.Visible = false
 	GoodSection.Visible = false
 	MiscSection.Visible = false
 
-	-- show selected section
 	if tab == GeneralStuff then
 		GeneralSection.Visible = true
 	elseif tab == GoodStuff then
@@ -108,14 +105,14 @@ local function selectTab(tab)
 		MiscSection.Visible = true
 	end
 
-	tab.TextColor3 = Color3.fromRGB(0,255,255) -- highlight active tab
+	tab.TextColor3 = Color3.fromRGB(0,255,255)
 end
 
 GeneralStuff.MouseButton1Click:Connect(function() selectTab(GeneralStuff) end)
 GoodStuff.MouseButton1Click:Connect(function() selectTab(GoodStuff) end)
 MiscStuff.MouseButton1Click:Connect(function() selectTab(MiscStuff) end)
 
--- END KEY TOGGLE
+-- GUI Toggle with END key
 local guiOn = true
 UIS.InputBegan:Connect(function(input,gp)
 	if gp then return end
@@ -125,53 +122,8 @@ UIS.InputBegan:Connect(function(input,gp)
 	end
 end)
 
--- WALK SPEED
-local WalkSpeedLabel = Instance.new("TextLabel")
-WalkSpeedLabel.Parent = GeneralSection
-WalkSpeedLabel.Size = UDim2.new(0,120,0,30)
-WalkSpeedLabel.Position = UDim2.new(0, padding, 0, padding)
-WalkSpeedLabel.BackgroundTransparency = 1
-WalkSpeedLabel.Text = "Walk Speed:"
-WalkSpeedLabel.TextColor3 = Color3.fromRGB(255,255,255)
-WalkSpeedLabel.Font = Enum.Font.GothamBold
-WalkSpeedLabel.TextSize = 14
-WalkSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local WalkSpeedInput = Instance.new("TextBox")
-WalkSpeedInput.Parent = GeneralSection
-WalkSpeedInput.Size = UDim2.new(0,80,0,30)
-WalkSpeedInput.Position = UDim2.new(0, 130, 0, padding)
-WalkSpeedInput.PlaceholderText = "16"
-WalkSpeedInput.Text = ""
-WalkSpeedInput.TextColor3 = Color3.fromRGB(255,255,255)
-WalkSpeedInput.Font = Enum.Font.Gotham
-WalkSpeedInput.TextSize = 14
-WalkSpeedInput.BackgroundColor3 = Color3.fromRGB(60,60,60)
-WalkSpeedInput.ClearTextOnFocus = false
-
-local ApplySpeedBtn = Instance.new("TextButton")
-ApplySpeedBtn.Parent = GeneralSection
-ApplySpeedBtn.Size = UDim2.new(0,80,0,30)
-ApplySpeedBtn.Position = UDim2.new(0, 220, 0, padding)
-ApplySpeedBtn.Text = "Apply"
-ApplySpeedBtn.BackgroundColor3 = Color3.fromRGB(0,140,255)
-ApplySpeedBtn.TextColor3 = Color3.fromRGB(255,255,255)
-ApplySpeedBtn.Font = Enum.Font.GothamBold
-ApplySpeedBtn.TextSize = 14
-
-ApplySpeedBtn.MouseButton1Click:Connect(function()
-	local speed = tonumber(WalkSpeedInput.Text)
-	if speed then
-		local char = plr.Character
-		if char and char:FindFirstChild("Humanoid") then
-			char.Humanoid.WalkSpeed = speed
-		end
-	end
-end)
-
-local padding = 5
-local buttonHeight = 30
-local currentY = padding -- keep track of the next Y position
+-- GENERAL CONTROLS
+local currentY = padding
 
 -- WALK SPEED
 local WalkSpeedLabel = Instance.new("TextLabel")
@@ -207,16 +159,6 @@ ApplySpeedBtn.TextColor3 = Color3.fromRGB(255,255,255)
 ApplySpeedBtn.Font = Enum.Font.GothamBold
 ApplySpeedBtn.TextSize = 14
 
-ApplySpeedBtn.MouseButton1Click:Connect(function()
-	local speed = tonumber(WalkSpeedInput.Text)
-	if speed then
-		local char = plr.Character
-		if char and char:FindFirstChild("Humanoid") then
-			char.Humanoid.WalkSpeed = speed
-		end
-	end
-end)
-
 local DisableSpeedBtn = Instance.new("TextButton")
 DisableSpeedBtn.Parent = GeneralSection
 DisableSpeedBtn.Size = UDim2.new(0,80,0,buttonHeight)
@@ -245,9 +187,9 @@ DisableSpeedBtn.MouseButton1Click:Connect(function()
 	WalkSpeedInput.Text = ""
 end)
 
--- update Y for next control
 currentY = currentY + buttonHeight + padding
 
+-- FLIGHT
 local FlightLabel = Instance.new("TextLabel")
 FlightLabel.Parent = GeneralSection
 FlightLabel.Size = UDim2.new(0,120,0,buttonHeight)
@@ -294,6 +236,7 @@ DisableFlightBtn.TextSize = 14
 local flying = false
 local flightSpeed = 50
 local bodyVelocity
+local cam = workspace.CurrentCamera
 
 ApplyFlightBtn.MouseButton1Click:Connect(function()
 	local speed = tonumber(FlightInput.Text)
@@ -320,9 +263,7 @@ DisableFlightBtn.MouseButton1Click:Connect(function()
 	FlightInput.Text = ""
 end)
 
--- Flight movement relative to camera
-local cam = workspace.CurrentCamera
-game:GetService("RunService").RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()
 	if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
 		local hrp = plr.Character.HumanoidRootPart
 		local direction = Vector3.new()
@@ -331,7 +272,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
 		if UIS:IsKeyDown(Enum.KeyCode.A) then direction = direction - cam.CFrame.RightVector end
 		if UIS:IsKeyDown(Enum.KeyCode.D) then direction = direction + cam.CFrame.RightVector end
 		if UIS:IsKeyDown(Enum.KeyCode.Space) then direction = direction + Vector3.new(0,1,0) end
-		-- No downward movement
 		if direction.Magnitude > 0 then
 			bodyVelocity.Velocity = direction.Unit * flightSpeed
 		else
@@ -340,10 +280,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	end
 end)
 
-
-
-
--- update Y for next control
 currentY = currentY + buttonHeight + padding
 
 -- TELEPORT TO MOUSE
@@ -366,9 +302,7 @@ TpCheckbox.BackgroundColor3 = Color3.fromRGB(60,60,60)
 TpCheckbox.Text = ""
 TpCheckbox.AutoButtonColor = false
 
--- toggle state
 local TpEnabled = false
-
 TpCheckbox.MouseButton1Click:Connect(function()
 	TpEnabled = not TpEnabled
 	if TpEnabled then
@@ -378,23 +312,17 @@ TpCheckbox.MouseButton1Click:Connect(function()
 	end
 end)
 
--- teleport logic using UserInputService
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
 RunService.RenderStepped:Connect(function()
 	if TpEnabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
 		if UIS:IsKeyDown(Enum.KeyCode.LeftControl) and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
 			local hrp = plr.Character.HumanoidRootPart
-			local mousePos = UIS:GetMouseLocation() -- screen position
+			local mousePos = UIS:GetMouseLocation()
 			local ray = workspace.CurrentCamera:ScreenPointToRay(mousePos.X, mousePos.Y)
-			local targetPos = ray.Origin + ray.Direction * 100 -- max 100 studs away
-			-- small offset so you don’t get stuck
+			local targetPos = ray.Origin + ray.Direction * 100
 			hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,3,0))
 		end
 	end
 end)
-
 
 currentY = currentY + buttonHeight + padding
 
@@ -428,8 +356,7 @@ InfiniteJumpBox.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Persistent Infinite Jump
-game:GetService("UserInputService").JumpRequest:Connect(function()
+UIS.JumpRequest:Connect(function()
 	if infiniteJumpEnabled then
 		local char = plr.Character
 		if char and char:FindFirstChild("Humanoid") then
@@ -439,7 +366,6 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
 end)
 
 currentY = currentY + buttonHeight + padding
-
 
 -- NOCLIP
 local NoclipLabel = Instance.new("TextLabel")
@@ -471,8 +397,7 @@ NoclipBox.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Noclip logic
-game:GetService("RunService").Stepped:Connect(function()
+RunService.Stepped:Connect(function()
 	if noclipEnabled and plr.Character then
 		for _, part in pairs(plr.Character:GetChildren()) do
 			if part:IsA("BasePart") and part.CanCollide then
@@ -482,9 +407,9 @@ game:GetService("RunService").Stepped:Connect(function()
 	end
 end)
 
--- update Y for next control if you want to add more
 currentY = currentY + buttonHeight + padding
 
+-- REMOVE INSANITY
 local RemoveLabel = Instance.new("TextLabel")
 RemoveLabel.Parent = GeneralSection
 RemoveLabel.Size = UDim2.new(0,120,0,buttonHeight)
@@ -505,10 +430,9 @@ RemoveBtn.TextColor3 = Color3.fromRGB(255,255,255)
 RemoveBtn.Font = Enum.Font.GothamBold
 RemoveBtn.TextSize = 14
 RemoveBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-RemoveBtn.BorderColor3 = Color3.fromRGB(128,0,128) -- purple border
+RemoveBtn.BorderColor3 = Color3.fromRGB(128,0,128)
 
 RemoveBtn.MouseButton1Click:Connect(function()
-	local plr = game.Players.LocalPlayer
 	local insanityScript = plr.PlayerGui:FindFirstChild("Temp")
 	if insanityScript and insanityScript:FindFirstChild("Insanity") then
 		insanityScript.Insanity:Destroy()
@@ -517,7 +441,7 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
--- REMOVE FOG PARTICLES
+-- REMOVE FOG
 local RemoveFogLabel = Instance.new("TextLabel")
 RemoveFogLabel.Parent = GeneralSection
 RemoveFogLabel.Size = UDim2.new(0,140,0,buttonHeight)
@@ -538,48 +462,11 @@ RemoveFogBtn.TextColor3 = Color3.fromRGB(255,255,255)
 RemoveFogBtn.Font = Enum.Font.GothamBold
 RemoveFogBtn.TextSize = 14
 RemoveFogBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-RemoveFogBtn.BorderColor3 = Color3.fromRGB(128,0,128) -- purple border
+RemoveFogBtn.BorderColor3 = Color3.fromRGB(128,0,128)
 
 RemoveFogBtn.MouseButton1Click:Connect(function()
-	local plr = game.Players.LocalPlayer
 	local tempFolder = plr.PlayerGui:FindFirstChild("Temp")
 	if tempFolder and tempFolder:FindFirstChild("FogParticles") then
 		tempFolder.FogParticles:Destroy()
-	end
-end)
-
-currentY = currentY + buttonHeight + padding
-
--- DISABLE PVP
-local PVPLabel = Instance.new("TextLabel")
-PVPLabel.Parent = GeneralSection
-PVPLabel.Size = UDim2.new(0,120,0,buttonHeight)
-PVPLabel.Position = UDim2.new(0, padding, 0, currentY)
-PVPLabel.BackgroundTransparency = 1
-PVPLabel.Text = "Disable PVP:"
-PVPLabel.TextColor3 = Color3.fromRGB(255,255,255)
-PVPLabel.Font = Enum.Font.GothamBold
-PVPLabel.TextSize = 14
-PVPLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local PVPBtn = Instance.new("TextButton")
-PVPBtn.Parent = GeneralSection
-PVPBtn.Size = UDim2.new(0,80,0,buttonHeight)
-PVPBtn.Position = UDim2.new(0, 130, 0, currentY)
-PVPBtn.Text = "Disable"
-PVPBtn.TextColor3 = Color3.fromRGB(255,255,255)
-PVPBtn.Font = Enum.Font.GothamBold
-PVPBtn.TextSize = 14
-PVPBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-PVPBtn.BorderColor3 = Color3.fromRGB(128,0,128) -- purple border
-
-PVPBtn.MouseButton1Click:Connect(function()
-	local plr = game.Players.LocalPlayer
-	local bin = plr:FindFirstChild("bin")
-	if bin then
-		local PVP = bin:FindFirstChild("PVP")
-		if PVP and PVP:IsA("BoolValue") then
-			PVP.Value = false
-		end
 	end
 end)
