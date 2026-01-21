@@ -1,0 +1,375 @@
+-- Decompiled with Konstant V2.1, a fast Luau decompiler made in Luau by plusgiant5 (https://discord.gg/brNTY8nX8t)
+-- Decompiled on 2026-01-21 06:22:14
+-- Luau version 6, Types version 3
+-- Time taken: 0.037732 seconds
+
+local Modules = game.ReplicatedStorage.RS:WaitForChild("Modules")
+local Basic_upvr = require(Modules.Basic)
+local LocalPlayer_upvr = game.Players.LocalPlayer
+repeat
+	Basic_upvr.Wait()
+until LocalPlayer_upvr.Character ~= nil
+local TweenService_upvr = game:GetService("TweenService")
+local Character_upvr = LocalPlayer_upvr.Character
+local HumanoidRootPart_upvr = Character_upvr:WaitForChild("HumanoidRootPart")
+local var7_upvw = false
+local random_state_upvr = Random.new()
+Basic_upvr.FFCD(workspace.Effects, "ChaosEnergy")
+Basic_upvr.FFCD(game.Lighting, "SoulCC")
+Basic_upvr.FFCD(game.Lighting, "InsanityCC")
+Basic_upvr.FFCD(game.Lighting, "InsanityBlur")
+local tbl_upvr_2 = {NumberRange.new(7, 12), NumberRange.new(5, 10), NumberRange.new(0, 5)}
+local tbl_upvr = {"You feel a strong urge to kill...", "I must kill...", "You feel a dark presence entering your mind...", "The shadow figures... who are they?", "A sharp pain bursts inside your head, followed by an image of eyes... who is it?", "You feel yourself being pushed out of your mind...", "The whispers... they almost make sense...", "A million eyes are staring at you...", "You feel blood on your hands, but nothing is there...", "What is this strange energy? You've never felt anything like it...", "An aura of death washes over you, as if you were walking in a field of corpses...", "You become struck by a sudden terror, and your body becomes ice cold...", "I was doing... I was... I...", "Where am I?", "You feel an intense headache and nausea...", "You feel like there's bugs crawling on you, but find none...", "You hear your name being called in the distance...", "You feel people staring at you hatefully...", "Dead~... dead~... they're all dead~...", "You mutter words that you don't understand...", "Am I... okay...?", "I don't remember... who I was...", "You hear a strange ticking noise...", "You hear a voice shouting help me in the distance...", "I don't belong here...", "You suddenly feel overwhelming fear...", "You suddenly feel overwhelming anger...", "You feel something behind you...", "You haven't been able to sleep in days...", "Your body creaks and aches...", "Where is it?!", "You feel as if you're suffocating...", "Why do they all hate me? Don't they know everything I've done to help?", "The air is cold and dry...", "You feel as if you're sinking...", "You smell blood...", "You taste iron...", "I don't know how long I can take it day after day...", "Could it be that I no longer care...?", "The energy... it's all around me..."}
+local function WardingBurst_upvr(arg1) -- Line 74, Named "WardingBurst"
+	--[[ Upvalues[7]:
+		[1]: random_state_upvr (readonly)
+		[2]: Character_upvr (readonly)
+		[3]: var7_upvw (read and write)
+		[4]: LocalPlayer_upvr (readonly)
+		[5]: Basic_upvr (readonly)
+		[6]: HumanoidRootPart_upvr (readonly)
+		[7]: TweenService_upvr (readonly)
+	]]
+	if arg1 < 5 then
+	else
+		if random_state_upvr:NextInteger(1, 40) ~= 1 then return end
+		if Character_upvr:FindFirstChild("Halo") then return end
+		var7_upvw = true
+		local clone_5 = game.ReplicatedStorage.RS.UI.StatusOverlay:Clone()
+		clone_5.Name = "InsanityOverlay"
+		clone_5.Fade.Value = "Fade"
+		clone_5.Lifetime.Value = 3
+		clone_5.Transparency.Value = 0
+		clone_5.Overlay.Image = "rbxassetid://6417092729"
+		clone_5.Overlay.ImageColor3 = Color3.new(1, 1, 0)
+		clone_5.Parent = LocalPlayer_upvr.PlayerGui
+		Basic_upvr.PlaySound(game.ReplicatedStorage.RS.SFX.Misc.WardingBurst, HumanoidRootPart_upvr)
+		Basic_upvr.PlaySound(game.ReplicatedStorage.RS.SFX.Misc.WardingProtect, HumanoidRootPart_upvr, 1.3)
+		local clone_8_upvr = game.ReplicatedStorage.RS.Particles.Misc.WardingBurst:Clone()
+		clone_8_upvr.Enabled = true
+		clone_8_upvr.Parent = HumanoidRootPart_upvr
+		local PointLight_upvr_2 = Instance.new("PointLight")
+		game.Debris:AddItem(PointLight_upvr_2, 2)
+		PointLight_upvr_2.Color = Color3.new(1, 1, 0)
+		PointLight_upvr_2.Brightness = 0
+		PointLight_upvr_2.Range = 0
+		PointLight_upvr_2.Parent = HumanoidRootPart_upvr
+		TweenService_upvr:Create(PointLight_upvr_2, TweenInfo.new(2), {
+			Brightness = 3;
+			Range = 40;
+		}):Play()
+		coroutine.wrap(function() -- Line 100
+			--[[ Upvalues[6]:
+				[1]: Basic_upvr (copied, readonly)
+				[2]: Character_upvr (copied, readonly)
+				[3]: clone_8_upvr (readonly)
+				[4]: TweenService_upvr (copied, readonly)
+				[5]: PointLight_upvr_2 (readonly)
+				[6]: var7_upvw (copied, read and write)
+			]]
+			Basic_upvr.Wait(3)
+			if Character_upvr:FindFirstChild("Head") == nil then
+			else
+				local clone_6 = game.ReplicatedStorage.RS.Objects.Halo:Clone()
+				clone_6.Transparency = 1
+				clone_6.Parent = Character_upvr
+				local Weld = Instance.new("Weld")
+				Weld.Part0 = clone_6
+				Weld.Part1 = Character_upvr.Head
+				Weld.C0 = CFrame.new(0, -1.5, 0)
+				Weld.Parent = clone_6
+				clone_8_upvr.Enabled = false
+				TweenService_upvr:Create(PointLight_upvr_2, TweenInfo.new(2), {
+					Brightness = 0;
+				}):Play()
+				TweenService_upvr:Create(clone_6, TweenInfo.new(2), {
+					Transparency = 0;
+				}):Play()
+				Basic_upvr.Wait(2)
+				clone_8_upvr:Destroy()
+				Basic_upvr.Wait(58)
+				var7_upvw = false
+				TweenService_upvr:Create(clone_6, TweenInfo.new(2), {
+					Transparency = 1;
+				}):Play()
+				Basic_upvr.Wait(2)
+				clone_6:Destroy()
+			end
+		end)()
+	end
+end
+local function WardingEffect_upvr(arg1) -- Line 124, Named "WardingEffect"
+	--[[ Upvalues[6]:
+		[1]: random_state_upvr (readonly)
+		[2]: WardingBurst_upvr (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+		[4]: Basic_upvr (readonly)
+		[5]: HumanoidRootPart_upvr (readonly)
+		[6]: TweenService_upvr (readonly)
+	]]
+	if arg1 < 1 then
+	else
+		if random_state_upvr:NextInteger(1, 7 - arg1) ~= 1 then
+			WardingBurst_upvr(arg1)
+			return
+		end
+		local clone_3 = game.ReplicatedStorage.RS.UI.StatusOverlay:Clone()
+		clone_3.Name = "InsanityOverlay"
+		clone_3.Fade.Value = "Fade"
+		clone_3.Lifetime.Value = 1
+		clone_3.Transparency.Value = 1 - arg1 / 10
+		clone_3.Overlay.Image = "rbxassetid://6417092729"
+		clone_3.Overlay.ImageColor3 = Color3.new(1, 1, 0)
+		clone_3.Parent = LocalPlayer_upvr.PlayerGui
+		Basic_upvr.PlaySound(game.ReplicatedStorage.RS.SFX.Misc.WardingProtect, HumanoidRootPart_upvr, 0.7 + arg1 * 0.1)
+		local PointLight_upvr = Instance.new("PointLight")
+		game.Debris:AddItem(PointLight_upvr, 2)
+		PointLight_upvr.Color = Color3.new(1, 1, 0)
+		PointLight_upvr.Brightness = 0
+		PointLight_upvr.Range = 0
+		PointLight_upvr.Parent = HumanoidRootPart_upvr
+		TweenService_upvr:Create(PointLight_upvr, TweenInfo.new(1), {
+			Brightness = 1;
+			Range = arg1 * 6;
+		}):Play()
+		coroutine.wrap(function() -- Line 145
+			--[[ Upvalues[3]:
+				[1]: Basic_upvr (copied, readonly)
+				[2]: TweenService_upvr (copied, readonly)
+				[3]: PointLight_upvr (readonly)
+			]]
+			Basic_upvr.Wait(1)
+			TweenService_upvr:Create(PointLight_upvr, TweenInfo.new(1), {
+				Brightness = 0;
+			}):Play()
+		end)()
+	end
+end
+LocalPlayer_upvr.bin.Region.Value = ""
+LocalPlayer_upvr.bin.Area.Value = ""
+game.Lighting.ColorCorrection.TintColor = Color3.new(1, 1, 1)
+local Inventory_upvr = require(Modules.Inventory)
+local var27_upvw = 0
+local var28_upvw = 0
+local var29_upvw = false
+local var30_upvw = false
+local var31_upvw = 0
+local var32_upvw = false
+local var33_upvw = false
+local Insanity_upvr = require(Modules.Insanity)
+local function InsanityUpdate_upvr() -- Line 156, Named "InsanityUpdate"
+	--[[ Upvalues[18]:
+		[1]: Inventory_upvr (readonly)
+		[2]: LocalPlayer_upvr (readonly)
+		[3]: var27_upvw (read and write)
+		[4]: var28_upvw (read and write)
+		[5]: var29_upvw (read and write)
+		[6]: var30_upvw (read and write)
+		[7]: var31_upvw (read and write)
+		[8]: tbl_upvr_2 (readonly)
+		[9]: var32_upvw (read and write)
+		[10]: Basic_upvr (readonly)
+		[11]: random_state_upvr (readonly)
+		[12]: var7_upvw (read and write)
+		[13]: tbl_upvr (readonly)
+		[14]: var33_upvw (read and write)
+		[15]: Character_upvr (readonly)
+		[16]: Insanity_upvr (readonly)
+		[17]: WardingEffect_upvr (readonly)
+		[18]: InsanityUpdate_upvr (readonly)
+	]]
+	-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+	local any_GetInsanityWarding_result1_upvr, any_GetInsanityWarding_result2, any_GetInsanityWarding_result3, any_GetInsanityWarding_result4_2 = Inventory_upvr.GetInsanityWarding(LocalPlayer_upvr, LocalPlayer_upvr.bin.Region.Value, LocalPlayer_upvr.bin.Area.Value)
+	local var53_upvr
+	if any_GetInsanityWarding_result1_upvr == var53_upvr then
+		var53_upvr = var28_upvw
+		if any_GetInsanityWarding_result2 == var53_upvr then
+			var53_upvr = var29_upvw
+			if any_GetInsanityWarding_result3 == var53_upvr then
+				var53_upvr = var30_upvw
+				if any_GetInsanityWarding_result4_2 == var53_upvr then return end
+			end
+		end
+	end
+	var27_upvw = any_GetInsanityWarding_result1_upvr
+	var28_upvw = any_GetInsanityWarding_result2
+	var29_upvw = any_GetInsanityWarding_result3
+	var30_upvw = any_GetInsanityWarding_result4_2
+	if var31_upvw == 11 then
+		var53_upvr = 0
+	else
+		var53_upvr = var31_upvw + 1
+	end
+	var31_upvw = var53_upvr
+	var53_upvr = var31_upvw
+	if var27_upvw == 0 then
+	else
+		local var54 = var28_upvw * 2 * 0.1 + 1
+		local _ = tbl_upvr_2[var27_upvw]
+		if var29_upvw == true or var30_upvw == true then
+		end
+		if var30_upvw == false then
+		end
+		if 2 <= var27_upvw then
+			local var57_upvw = 0 * var54 + var28_upvw
+			local var58_upvw = 2 * var54 + var28_upvw
+			coroutine.wrap(function() -- Line 172
+				--[[ Upvalues[13]:
+					[1]: var32_upvw (copied, read and write)
+					[2]: var57_upvw (read and write)
+					[3]: var58_upvw (read and write)
+					[4]: var31_upvw (copied, read and write)
+					[5]: var53_upvr (readonly)
+					[6]: var27_upvw (copied, read and write)
+					[7]: any_GetInsanityWarding_result1_upvr (readonly)
+					[8]: Basic_upvr (copied, readonly)
+					[9]: random_state_upvr (copied, readonly)
+					[10]: var28_upvw (copied, read and write)
+					[11]: var7_upvw (copied, read and write)
+					[12]: tbl_upvr (copied, readonly)
+					[13]: LocalPlayer_upvr (copied, readonly)
+				]]
+				if var32_upvw == true then
+				else
+					local clone_2 = game.ReplicatedStorage.RS.UI.StatusOverlay:Clone()
+					clone_2.Name = "InsanityTextOverlay"
+					clone_2.Fade.Value = "Fade"
+					clone_2.Lifetime.Value = 5
+					clone_2.Transparency.Value = 0.75
+					clone_2.Overlay.Image = "rbxassetid://6417092729"
+					clone_2.Overlay.ImageColor3 = Color3.new(0, 0, 0)
+					clone_2.Title.TextColor3 = Color3.new(1, 0, 0)
+					clone_2.Title.TextStrokeColor3 = Color3.new(0, 0, 0)
+					clone_2.Title.Font = Enum.Font.Fondamento
+					clone_2.Title.FontFace.Bold = true
+					clone_2.Title.FontFace.Style = Enum.FontStyle.Italic
+					var32_upvw = true
+					while var31_upvw == var53_upvr and var27_upvw == any_GetInsanityWarding_result1_upvr do
+						Basic_upvr.Wait(random_state_upvr:NextInteger(math.clamp(var57_upvw + 5, 15, 30), math.clamp(var58_upvw + 5, 25, 40)))
+						if var31_upvw ~= var53_upvr then break end
+						if var27_upvw ~= any_GetInsanityWarding_result1_upvr then break end
+						if not var28_upvw or var27_upvw >= var28_upvw then
+							if var7_upvw == false then
+								Basic_upvr.FFCD(LocalPlayer_upvr.PlayerGui, "InsanityTextOverlay")
+								local clone = clone_2:Clone()
+								clone.DisplayOrder = 3
+								clone.Title.Text = tbl_upvr[random_state_upvr:NextInteger(1, #tbl_upvr)]
+								clone.Parent = LocalPlayer_upvr.PlayerGui
+							end
+						end
+					end
+					var32_upvw = false
+					clone_2:Destroy()
+				end
+			end)()
+		end
+		if var33_upvw == true then return end
+		var33_upvw = true
+		while true do
+			local var61_upvw
+			if Character_upvr == nil then break end
+			var61_upvw = Basic_upvr
+			var61_upvw = Character_upvr
+			if var61_upvw.IsFigureAlive(var61_upvw) == false then break end
+			if var31_upvw ~= var53_upvr then break end
+			if var27_upvw ~= any_GetInsanityWarding_result1_upvr then break end
+			if var28_upvw ~= any_GetInsanityWarding_result2 then break end
+			var61_upvw = Basic_upvr
+			var61_upvw = random_state_upvr:NextInteger(var57_upvw, var58_upvw)
+			var61_upvw.Wait(var61_upvw)
+			if Character_upvr == nil then break end
+			var61_upvw = Basic_upvr
+			var61_upvw = Character_upvr
+			if var61_upvw.IsFigureAlive(var61_upvw) == false then break end
+			if var31_upvw ~= var53_upvr then break end
+			if var27_upvw ~= any_GetInsanityWarding_result1_upvr then break end
+			if var28_upvw ~= any_GetInsanityWarding_result2 then break end
+			var61_upvw = Insanity_upvr["Insanity"..random_state_upvr:NextInteger(1, var27_upvw)]
+			if var61_upvw == nil or #var61_upvw == 0 then
+				var61_upvw = Insanity_upvr.Insanity1
+			end
+			if Character_upvr:FindFirstChild("Cutscene") == nil and var7_upvw == false and 0 < var27_upvw and (var28_upvw <= var27_upvw or 3 < var27_upvw) then
+				WardingEffect_upvr(var28_upvw)
+				if var61_upvw[random_state_upvr:NextInteger(1, #var61_upvw)](LocalPlayer_upvr, Character_upvr, var27_upvw) == true then
+					coroutine.wrap(function() -- Line 218
+						--[[ Upvalues[6]:
+							[1]: Basic_upvr (copied, readonly)
+							[2]: Character_upvr (copied, readonly)
+							[3]: var27_upvw (copied, read and write)
+							[4]: var61_upvw (read and write)
+							[5]: random_state_upvr (copied, readonly)
+							[6]: LocalPlayer_upvr (copied, readonly)
+						]]
+						Basic_upvr.Wait(3)
+						if Character_upvr:FindFirstChild("Cutscene") then
+						elseif 0 < var27_upvw then
+							var61_upvw[random_state_upvr:NextInteger(1, #var61_upvw)](LocalPlayer_upvr, Character_upvr, var27_upvw)
+						end
+					end)()
+				end
+			end
+		end
+		var33_upvw = false
+		if 0 < var27_upvw then
+			InsanityUpdate_upvr()
+		end
+	end
+end
+Character_upvr.ChildAdded:Connect(function(arg1) -- Line 232
+	--[[ Upvalues[4]:
+		[1]: Basic_upvr (readonly)
+		[2]: Character_upvr (readonly)
+		[3]: InsanityUpdate_upvr (readonly)
+		[4]: TweenService_upvr (readonly)
+	]]
+	if Basic_upvr.IsFigureAlive(Character_upvr) == false then
+	else
+		if arg1.Name == "Insanity" or arg1.Name == "Warding" then
+			if arg1.ClassName == "Script" then
+				Basic_upvr.Wait()
+				arg1:WaitForChild("Tier")
+				InsanityUpdate_upvr()
+				return
+			end
+		end
+		if arg1.Name ~= "InsanityDamage" then return end
+		Character_upvr.Humanoid.Animator:LoadAnimation(game.ReplicatedStorage.RS.Animations.Movement.Standard.WeakHit1):Play()
+		local BlurEffect = Instance.new("BlurEffect")
+		game.Debris:AddItem(BlurEffect, 1)
+		BlurEffect.Size = 0
+		BlurEffect.Parent = game.Lighting
+		TweenService_upvr:Create(BlurEffect, TweenInfo.new(0.5), {
+			Size = 10;
+		}):Play()
+		Basic_upvr.Wait(0.5)
+		TweenService_upvr:Create(BlurEffect, TweenInfo.new(0.5), {
+			Size = 0;
+		}):Play()
+		BlurEffect:Destroy()
+	end
+end)
+Character_upvr.ChildRemoved:Connect(function(arg1) -- Line 251
+	--[[ Upvalues[3]:
+		[1]: Basic_upvr (readonly)
+		[2]: Character_upvr (readonly)
+		[3]: InsanityUpdate_upvr (readonly)
+	]]
+	if Basic_upvr.IsFigureAlive(Character_upvr) == false then
+	elseif arg1.Name == "Insanity" or arg1.Name == "Warding" then
+		if arg1.ClassName == "Script" then
+			Basic_upvr.Wait()
+			InsanityUpdate_upvr()
+			return
+		end
+	end
+end)
+game.ReplicatedStorage.RS:WaitForChild("Remotes").UI.UpdateInsanity.OnClientEvent:Connect(InsanityUpdate_upvr)
+LocalPlayer_upvr.bin:WaitForChild("Region").Changed:Connect(InsanityUpdate_upvr)
+if Basic_upvr.ResolvePlaceId() == "Arcane Odyssey" then
+else
+	repeat
+		Basic_upvr.Wait()
+	until Character_upvr:FindFirstChild("Data")
+	Character_upvr.Data:WaitForChild("CharacterData")
+	InsanityUpdate_upvr()
+end
