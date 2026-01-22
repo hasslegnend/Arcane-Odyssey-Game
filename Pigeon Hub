@@ -576,8 +576,7 @@ currentY = currentY + buttonHeight + padding
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 
-local espEnabled = false
-local espObjects = {}
+-- === SETTINGS ===
 local MAX_DISTANCE = 5000
 local CHEST_NAMES = {
 	["Treasure Chest"] = Color3.new(1,1,1),
@@ -587,29 +586,41 @@ local CHEST_NAMES = {
 	["Legendary Chest"] = Color3.new(0,1,0)
 }
 
--- Toggle button in your UI
+local espEnabled = false
+local espObjects = {}
+
+-- === UI BUTTON ===
+local screenGui = player:WaitForChild("PlayerGui"):FindFirstChild("ScreenGui") 
+if not screenGui then
+	screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "ScreenGui"
+	screenGui.Parent = player.PlayerGui
+end
+
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0,150,0,50)
 toggleButton.Position = UDim2.new(0,10,0,10)
 toggleButton.Text = "Chest ESP"
 toggleButton.BackgroundColor3 = Color3.new(0.2,0.2,0.2)
 toggleButton.TextColor3 = Color3.new(1,1,1)
-toggleButton.Parent = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui") -- adjust if your UI has a folder
+toggleButton.TextScaled = true
+toggleButton.Parent = screenGui
 
 toggleButton.MouseButton1Click:Connect(function()
 	espEnabled = not espEnabled
 	toggleButton.BackgroundColor3 = espEnabled and Color3.new(0,1,0) or Color3.new(0.2,0.2,0.2)
 end)
 
+-- === FUNCTION TO CREATE ESP ===
 local function createESP(chest)
-	if espObjects[chest] then return end -- already exists
+	if espObjects[chest] then return end
 
 	local part = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
 	if not part then return end
 
 	local billboard = Instance.new("BillboardGui")
 	billboard.Adornee = part
-	billboard.Size = UDim2.new(0,100,0,50)
+	billboard.Size = UDim2.new(0,150,0,50)
 	billboard.StudsOffset = Vector3.new(0,3,0)
 	billboard.AlwaysOnTop = true
 	billboard.Name = "ChestESP"
@@ -620,23 +631,32 @@ local function createESP(chest)
 	text.Text = chest.Name
 	text.TextColor3 = CHEST_NAMES[chest.Name] or Color3.new(1,1,1)
 	text.TextScaled = true
+	text.Font = Enum.Font.SourceSansBold
 	text.Parent = billboard
 
-	billboard.Parent = player:WaitForChild("PlayerGui")
+	billboard.Parent = screenGui
 	espObjects[chest] = billboard
 end
 
+-- === RENDER LOOP ===
 RunService.RenderStepped:Connect(function()
-	if not espEnabled then return end
-	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+	if not espEnabled then
+		-- optionally destroy all ESP when off
+		for chest, gui in pairs(espObjects) do
+			gui:Destroy()
+		end
+		espObjects = {}
+		return
+	end
 
-	local hrp = player.Character.HumanoidRootPart.Position
+	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+	local hrpPos = player.Character.HumanoidRootPart.Position
 
 	for _, obj in ipairs(workspace:GetChildren()) do
 		if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
 			local part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
 			if part then
-				local dist = (part.Position - hrp).Magnitude
+				local dist = (part.Position - hrpPos).Magnitude
 				if dist <= MAX_DISTANCE then
 					createESP(obj)
 				elseif espObjects[obj] then
@@ -644,20 +664,12 @@ RunService.RenderStepped:Connect(function()
 					espObjects[obj] = nil
 				end
 
-				-- Remove ESP if the chest starts opening (transparency > 0)
+				-- remove ESP if chest is opening (transparency > 0)
 				if espObjects[obj] and part.Transparency > 0 then
 					espObjects[obj]:Destroy()
 					espObjects[obj] = nil
 				end
 			end
-		end
-	end
-
-	-- cleanup for destroyed chests
-	for model, gui in pairs(espObjects) do
-		if not model.Parent then
-			gui:Destroy()
-			espObjects[model] = nil
 		end
 	end
 end)
