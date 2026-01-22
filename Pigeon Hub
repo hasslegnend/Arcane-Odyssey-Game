@@ -82,6 +82,35 @@ local function createSection()
 	return sec
 end
 
+
+local function createLabelWithCheckbox(parent, text)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, 0, 0, buttonHeight)
+	container.BackgroundTransparency = 1
+	container.Parent = parent
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0, 120, 1, 0)
+	label.Position = UDim2.new(0, 0, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(255,255,255)
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 14
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = container
+
+	local checkbox = Instance.new("TextButton")
+	checkbox.Size = UDim2.new(0, 30, 0, buttonHeight)
+	checkbox.Position = UDim2.new(0, 130, 0, 0)
+	checkbox.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	checkbox.Text = ""
+	checkbox.AutoButtonColor = false
+	checkbox.Parent = container
+
+	return checkbox
+end
+
 local GeneralStuff = createTab("GENERAL", UDim2.new(0, padding, 0, padding))
 local GoodStuff    = createTab("GOOD STUFF", UDim2.new(1/3, padding, 0, padding))
 local MiscStuff    = createTab("MISC", UDim2.new(2/3, padding, 0, padding))
@@ -537,13 +566,7 @@ BirdKillLabel.Font = Enum.Font.GothamBold
 BirdKillLabel.TextSize = 14
 BirdKillLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- Toggle Button
-local BirdKillToggle = Instance.new("TextButton")
-BirdKillToggle.Parent = GeneralSection
-BirdKillToggle.Size = UDim2.new(0,30,0,buttonHeight)
-BirdKillToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-BirdKillToggle.Text = ""
-BirdKillToggle.AutoButtonColor = false
+local BirdKillToggle = createLabelWithCheckbox(GeneralSection, "Auto BirdKill")
 
 -- Logic
 local birdKillEnabled = false
