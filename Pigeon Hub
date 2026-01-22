@@ -585,12 +585,25 @@ local CHEST_NAMES = {
     ["Legendary Chest"] = Color3.fromRGB(0,255,0),
 }
 
-local MAX_DISTANCE = 5000      -- Only render ESP if within this distance
-local CLOSE_DISTANCE = 50      -- Hide ESP if player is very close
+local MAX_DISTANCE = 5000
+local CLOSE_DISTANCE = 50
 local espObjects = {}
 local espEnabled = false
 
--- Create ESP above a chest
+-- Recursive search for all models
+local function getChests(parent)
+    local chests = {}
+    for _, obj in pairs(parent:GetChildren()) do
+        if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
+            table.insert(chests, obj)
+        end
+        for _, child in pairs(getChests(obj)) do
+            table.insert(chests, child)
+        end
+    end
+    return chests
+end
+
 local function createESP(model)
     if espObjects[model] then return end
     local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
@@ -611,54 +624,51 @@ local function createESP(model)
     text.TextScaled = true
     text.Font = Enum.Font.GothamBold
     text.TextStrokeTransparency = 0
-    text.TextColor3 = CHEST_NAMES[model.Name] or Color3.fromRGB(255,255,255)
+    text.TextColor3 = CHEST_NAMES[model.Name]
 
     billboard.Parent = model
     espObjects[model] = billboard
 end
 
--- Remove all ESP
-local function removeESP()
-    for model, gui in pairs(espObjects) do
-        if gui then gui:Destroy() end
+local function removeESP(model)
+    if model and espObjects[model] then
+        espObjects[model]:Destroy()
+        espObjects[model] = nil
     end
-    table.clear(espObjects)
 end
 
--- Update ESP every frame
+local function removeAllESP()
+    for model, _ in pairs(espObjects) do
+        removeESP(model)
+    end
+end
+
+-- Main update loop
 RunService.RenderStepped:Connect(function()
     if not espEnabled then return end
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
     local hrpPos = player.Character.HumanoidRootPart.Position
+    local chests = getChests(workspace)
 
-    for _, obj in ipairs(workspace:GetChildren()) do
-        if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
-            local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
-            if primary then
-                local dist = (primary.Position - hrpPos).Magnitude
+    for _, chest in ipairs(chests) do
+        local primary = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+        if primary then
+            local dist = (primary.Position - hrpPos).Magnitude
 
-                -- Remove ESP if too close or too far
-                if dist > MAX_DISTANCE or dist < CLOSE_DISTANCE then
-                    if espObjects[obj] then
-                        espObjects[obj]:Destroy()
-                        espObjects[obj] = nil
-                    end
-                else
-                    createESP(obj)
-                end
+            if dist > MAX_DISTANCE or dist < CLOSE_DISTANCE or not chest.Parent then
+                removeESP(chest)
+            else
+                createESP(chest)
             end
         end
     end
 end)
 
--- Chest ESP toggle button
+-- Toggle button
 local ChestToggle = addButton(MiscSection, "Chest ESP")
 ChestToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
-    ChestToggle.BackgroundColor3 = espEnabled
-        and Color3.fromRGB(0,140,255)
-        or Color3.fromRGB(60,60,60)
-
-    if not espEnabled then removeESP() end
+    ChestToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
+    if not espEnabled then removeAllESP() end
 end)
