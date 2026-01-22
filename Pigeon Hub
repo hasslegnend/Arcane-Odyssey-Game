@@ -63,16 +63,6 @@ local GeneralStuff = createTab("GENERAL", UDim2.new(0, padding, 0, padding))
 local GoodStuff    = createTab("GOOD STUFF", UDim2.new(1/3, padding, 0, padding))
 local MiscStuff    = createTab("MISC", UDim2.new(2/3, padding, 0, padding))
 
--- Sections
-local function createSection()
-	local sec = Instance.new("Frame")
-	sec.Parent = PigeonFrame
-	sec.Position = UDim2.new(0,0,0,45)
-	sec.Size = UDim2.new(1,0,1,-45)
-	sec.BackgroundTransparency = 1
-	sec.Visible = false
-	return sec
-end
 
 local GeneralSection = createSection()
 GeneralSection.Visible = true
