@@ -590,7 +590,7 @@ local CLOSE_DISTANCE = 50
 local espObjects = {}
 local espEnabled = false
 
--- Recursive search for all models
+-- Recursive search for all chest models
 local function getChests(parent)
     local chests = {}
     for _, obj in pairs(parent:GetChildren()) do
@@ -604,6 +604,7 @@ local function getChests(parent)
     return chests
 end
 
+-- Create ESP for a model
 local function createESP(model)
     if espObjects[model] then return end
     local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
@@ -612,8 +613,8 @@ local function createESP(model)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChestESP"
     billboard.Adornee = primary
-    billboard.Size = UDim2.new(0,200,0,50)
-    billboard.StudsOffset = Vector3.new(0,3,0)
+    billboard.Size = UDim2.new(0,100,0,25) -- smaller size
+    billboard.StudsOffset = Vector3.new(0,2,0)
     billboard.AlwaysOnTop = true
 
     local text = Instance.new("TextLabel")
@@ -625,11 +626,14 @@ local function createESP(model)
     text.Font = Enum.Font.GothamBold
     text.TextStrokeTransparency = 0
     text.TextColor3 = CHEST_NAMES[model.Name]
+    text.TextSize = 14 -- smaller text
+    text.TextScaled = false
 
     billboard.Parent = model
     espObjects[model] = billboard
 end
 
+-- Remove ESP
 local function removeESP(model)
     if model and espObjects[model] then
         espObjects[model]:Destroy()
@@ -643,25 +647,26 @@ local function removeAllESP()
     end
 end
 
--- Main update loop
-RunService.RenderStepped:Connect(function()
-    if not espEnabled then return end
-    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+-- Optimized loop (runs every 1 second)
+task.spawn(function()
+    while true do
+        if espEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local hrpPos = player.Character.HumanoidRootPart.Position
+            local chests = getChests(workspace)
 
-    local hrpPos = player.Character.HumanoidRootPart.Position
-    local chests = getChests(workspace)
-
-    for _, chest in ipairs(chests) do
-        local primary = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
-        if primary then
-            local dist = (primary.Position - hrpPos).Magnitude
-
-            if dist > MAX_DISTANCE or dist < CLOSE_DISTANCE or not chest.Parent then
-                removeESP(chest)
-            else
-                createESP(chest)
+            for _, chest in ipairs(chests) do
+                local primary = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+                if primary then
+                    local dist = (primary.Position - hrpPos).Magnitude
+                    if dist > MAX_DISTANCE or dist < CLOSE_DISTANCE or not chest.Parent then
+                        removeESP(chest)
+                    else
+                        createESP(chest)
+                    end
+                end
             end
         end
+        task.wait(1) -- only updates once per second
     end
 end)
 
