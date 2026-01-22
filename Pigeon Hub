@@ -574,12 +574,14 @@ end)
 currentY = currentY + buttonHeight + padding
 
 -- ========================
--- CHEST ESP
+-- CHEST ESP (Fixed)
 -- ========================
 local ChestESPButton = addButton(MiscSection, "Chest ESP", Color3.fromRGB(60,60,60))
 local chestESPEnabled = false
 local espObjects = {}
 local MAX_DISTANCE = 5000
+
+-- Define chest names and colors
 local CHEST_NAMES = {
 	["Treasure Chest"] = Color3.new(1,1,1),
 	["Uncommon Chest"] = Color3.new(1,1,1),
@@ -588,19 +590,22 @@ local CHEST_NAMES = {
 	["Legendary Chest"] = Color3.new(0,1,0)
 }
 
+-- Toggle button
 ChestESPButton.MouseButton1Click:Connect(function()
 	chestESPEnabled = not chestESPEnabled
 	if chestESPEnabled then
 		ChestESPButton.BackgroundColor3 = Color3.fromRGB(0,200,0)
 	else
 		ChestESPButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
+		-- remove all ESP
 		for _, gui in pairs(espObjects) do
-			gui:Destroy()
+			if gui then gui:Destroy() end
 		end
 		espObjects = {}
 	end
 end)
 
+-- Function to create ESP
 local function createESP(chest)
 	if espObjects[chest] then return end
 	local part = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
@@ -626,6 +631,7 @@ local function createESP(chest)
 	espObjects[chest] = billboard
 end
 
+-- Main loop
 RunService.RenderStepped:Connect(function()
 	if not chestESPEnabled then return end
 	if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
@@ -643,7 +649,7 @@ RunService.RenderStepped:Connect(function()
 					espObjects[obj] = nil
 				end
 
-				-- remove ESP if chest is opening (transparency > 0)
+				-- Remove ESP if chest is opening (transparency > 0)
 				if espObjects[obj] and part.Transparency > 0 then
 					espObjects[obj]:Destroy()
 					espObjects[obj] = nil
@@ -652,4 +658,3 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
-
