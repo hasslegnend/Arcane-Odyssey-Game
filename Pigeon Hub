@@ -589,29 +589,30 @@ local CHEST_NAMES = {
 local espEnabled = false
 local espObjects = {}
 
--- === UI BUTTON ===
-local screenGui = player:WaitForChild("PlayerGui"):FindFirstChild("ScreenGui") 
-if not screenGui then
-	screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "ScreenGui"
-	screenGui.Parent = player.PlayerGui
+-- === FIND MISC FRAME ===
+local miscFrame = player:WaitForChild("PlayerGui"):WaitForChild("AdminUI"):WaitForChild("Misc") -- adjust this path to your UI
+if not miscFrame then
+	warn("Misc frame not found!")
+	return
 end
 
+-- === CREATE TOGGLE BUTTON ===
 local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0,150,0,50)
-toggleButton.Position = UDim2.new(0,10,0,10)
+toggleButton.Size = UDim2.new(1,0,0,40)
+toggleButton.Position = UDim2.new(0,0,0,0)
 toggleButton.Text = "Chest ESP"
-toggleButton.BackgroundColor3 = Color3.new(0.2,0.2,0.2)
+toggleButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
 toggleButton.TextColor3 = Color3.new(1,1,1)
 toggleButton.TextScaled = true
-toggleButton.Parent = screenGui
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.Parent = miscFrame
 
 toggleButton.MouseButton1Click:Connect(function()
 	espEnabled = not espEnabled
-	toggleButton.BackgroundColor3 = espEnabled and Color3.new(0,1,0) or Color3.new(0.2,0.2,0.2)
+	toggleButton.BackgroundColor3 = espEnabled and Color3.new(0,1,0) or Color3.fromRGB(50,50,50)
 end)
 
--- === FUNCTION TO CREATE ESP ===
+-- === FUNCTION TO CREATE ESP LABEL ===
 local function createESP(chest)
 	if espObjects[chest] then return end
 
@@ -634,14 +635,13 @@ local function createESP(chest)
 	text.Font = Enum.Font.SourceSansBold
 	text.Parent = billboard
 
-	billboard.Parent = screenGui
+	billboard.Parent = player.PlayerGui -- labels appear in player GUI
 	espObjects[chest] = billboard
 end
 
 -- === RENDER LOOP ===
 RunService.RenderStepped:Connect(function()
 	if not espEnabled then
-		-- optionally destroy all ESP when off
 		for chest, gui in pairs(espObjects) do
 			gui:Destroy()
 		end
@@ -673,3 +673,4 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
+
