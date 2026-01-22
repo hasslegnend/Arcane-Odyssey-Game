@@ -1,5 +1,5 @@
 local plr = game.Players.LocalPlayer
-local PlayerGui = plr:WaitForChild("PlayerGui")
+local PlayerGui = plr.PlayerGui
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
@@ -573,93 +573,4 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
 
-local CHEST_NAMES = {
-    ["Treasure Chest"] = Color3.fromRGB(255,255,255),
-    ["Uncommon Chest"] = Color3.fromRGB(255,255,255),
-    ["Rare Chest"] = Color3.fromRGB(255,255,255),
-    ["Mystic Chest"] = Color3.fromRGB(255,0,0),
-    ["Legendary Chest"] = Color3.fromRGB(0,255,0),
-}
-
-local MAX_DISTANCE = 5000
-local CLOSE_DISTANCE = 50
-local espObjects = {}
-local espEnabled = false
-
--- Create ESP for a model (only once)
-local function createESP(model)
-    if espObjects[model] then return espObjects[model] end
-    local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-    if not primary then return end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "ChestESP"
-    billboard.Adornee = primary
-    billboard.Size = UDim2.new(0, 120, 0, 20) -- fixed pixel size
-    billboard.StudsOffset = Vector3.new(0,2,0)
-    billboard.AlwaysOnTop = true
-    billboard.MaxDistance = MAX_DISTANCE -- will not render beyond this distance
-
-    local text = Instance.new("TextLabel")
-    text.Parent = billboard
-    text.Size = UDim2.new(1,0,1,0)
-    text.BackgroundTransparency = 1
-    text.Text = model.Name
-    text.TextScaled = false
-    text.Font = Enum.Font.GothamBold
-    text.TextStrokeTransparency = 0
-    text.TextColor3 = CHEST_NAMES[model.Name]
-    text.TextSize = 14
-    text.TextXAlignment = Enum.TextXAlignment.Center
-    text.TextYAlignment = Enum.TextYAlignment.Center
-
-    billboard.Parent = model
-    espObjects[model] = billboard
-    return billboard
-end
-
--- Update visibility based on distance
-local function updateESP()
-    if not espEnabled then return end
-    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-    local hrpPos = player.Character.HumanoidRootPart.Position
-
-    for _, model in ipairs(workspace:GetChildren()) do
-        if CHEST_NAMES[model.Name] then
-            local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-            if primary then
-                local dist = (primary.Position - hrpPos).Magnitude
-                local gui = createESP(model)
-                if gui then
-                    gui.Enabled = dist <= MAX_DISTANCE and dist > CLOSE_DISTANCE
-                end
-            end
-        end
-    end
-end
-
--- Optimized loop: only runs every 0.5s
-task.spawn(function()
-    while true do
-        updateESP()
-        task.wait(0.5)
-    end
-end)
-
--- Toggle button (attach to your MiscSection)
-local ChestToggle = addButton(MiscSection, "Chest ESP")
-ChestToggle.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    ChestToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
-    if not espEnabled then
-        -- clean up to remove lag
-        for model, gui in pairs(espObjects) do
-            if gui then gui:Destroy()
-        end
-        espObjects = {}
-    end
-end)
