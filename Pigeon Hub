@@ -580,9 +580,7 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
+
 
 local CHEST_NAMES = {
     ["Treasure Chest"] = Color3.fromRGB(255,255,255),
