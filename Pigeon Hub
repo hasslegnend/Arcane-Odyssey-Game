@@ -470,3 +470,103 @@ RemoveFogBtn.MouseButton1Click:Connect(function()
 		tempFolder.FogParticles:Destroy()
 	end
 end)
+
+currentY = currentY + buttonHeight + padding
+
+-- AUTO WASH
+local WashLabel = Instance.new("TextLabel")
+WashLabel.Parent = GeneralSection
+WashLabel.Size = UDim2.new(0,120,0,buttonHeight)
+WashLabel.Position = UDim2.new(0, padding, 0, currentY)
+WashLabel.BackgroundTransparency = 1
+WashLabel.Text = "Auto Wash:"
+WashLabel.TextColor3 = Color3.fromRGB(255,255,255)
+WashLabel.Font = Enum.Font.GothamBold
+WashLabel.TextSize = 14
+WashLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local WashToggle = Instance.new("TextButton")
+WashToggle.Parent = GeneralSection
+WashToggle.Size = UDim2.new(0,30,0,buttonHeight)
+WashToggle.Position = UDim2.new(0, 130, 0, currentY)
+WashToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
+WashToggle.Text = ""
+WashToggle.AutoButtonColor = false
+
+local washEnabled = false
+local washThread = nil
+
+WashToggle.MouseButton1Click:Connect(function()
+	washEnabled = not washEnabled
+
+	if washEnabled then
+		WashToggle.BackgroundColor3 = Color3.fromRGB(0,140,255)
+
+		washThread = task.spawn(function()
+			while washEnabled do
+				local washRemote =
+					game.ReplicatedStorage
+					:WaitForChild("RS")
+					:WaitForChild("Remotes")
+					:WaitForChild("Boats")
+					:WaitForChild("Wash")
+
+				washRemote:FireServer()
+				task.wait(2)
+			end
+		end)
+	else
+		WashToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	end
+end)
+
+currentY = currentY + buttonHeight + padding
+
+
+-- BirdKill Label
+local BirdKillLabel = Instance.new("TextLabel")
+BirdKillLabel.Parent = MiscSection
+BirdKillLabel.Size = UDim2.new(0,140,0,buttonHeight)
+BirdKillLabel.Position = UDim2.new(0, padding, 0, currentY)
+BirdKillLabel.BackgroundTransparency = 1
+BirdKillLabel.Text = "Auto BirdKill:"
+BirdKillLabel.TextColor3 = Color3.fromRGB(255,255,255)
+BirdKillLabel.Font = Enum.Font.GothamBold
+BirdKillLabel.TextSize = 14
+BirdKillLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Toggle Button
+local BirdKillToggle = Instance.new("TextButton")
+BirdKillToggle.Parent = MiscSection
+BirdKillToggle.Size = UDim2.new(0,30,0,buttonHeight)
+BirdKillToggle.Position = UDim2.new(0, 150, 0, currentY)
+BirdKillToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
+BirdKillToggle.Text = ""
+BirdKillToggle.AutoButtonColor = false
+
+-- Logic
+local birdKillEnabled = false
+local birdKillThread
+
+local BirdKillRemote = game.ReplicatedStorage
+	:WaitForChild("RS")
+	:WaitForChild("Remotes")
+	:WaitForChild("Misc")
+	:WaitForChild("BirdKill")
+
+BirdKillToggle.MouseButton1Click:Connect(function()
+	birdKillEnabled = not birdKillEnabled
+
+	if birdKillEnabled then
+		BirdKillToggle.BackgroundColor3 = Color3.fromRGB(0,140,255)
+
+		birdKillThread = task.spawn(function()
+			while birdKillEnabled do
+				BirdKillRemote:FireServer("Eagle")
+				task.wait(1)
+			end
+		end)
+	else
+		BirdKillToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	end
+end)
