@@ -574,30 +574,27 @@ end)
 currentY = currentY + buttonHeight + padding
 
 -- ========================
--- CHEST ESP (Fixed)
+-- CHEST ESP (Working Version)
 -- ========================
 local ChestESPButton = addButton(MiscSection, "Chest ESP", Color3.fromRGB(60,60,60))
 local chestESPEnabled = false
 local espObjects = {}
 local MAX_DISTANCE = 5000
 
--- Define chest names and colors
 local CHEST_NAMES = {
-	["Treasure Chest"] = Color3.new(1,1,1),
-	["Uncommon Chest"] = Color3.new(1,1,1),
-	["Rare Chest"] = Color3.new(1,1,1),
-	["Mystic Chest"] = Color3.new(1,0,0),
-	["Legendary Chest"] = Color3.new(0,1,0)
+	["Treasure Chest"] = Color3.fromRGB(255,255,255),
+	["Uncommon Chest"] = Color3.fromRGB(255,255,255),
+	["Rare Chest"] = Color3.fromRGB(255,255,255),
+	["Mystic Chest"] = Color3.fromRGB(255,0,0),
+	["Legendary Chest"] = Color3.fromRGB(0,255,0)
 }
 
--- Toggle button
 ChestESPButton.MouseButton1Click:Connect(function()
 	chestESPEnabled = not chestESPEnabled
 	if chestESPEnabled then
 		ChestESPButton.BackgroundColor3 = Color3.fromRGB(0,200,0)
 	else
 		ChestESPButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
-		-- remove all ESP
 		for _, gui in pairs(espObjects) do
 			if gui then gui:Destroy() end
 		end
@@ -605,56 +602,59 @@ ChestESPButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Function to create ESP
+local function getChestPart(chest)
+	-- Try PrimaryPart first, otherwise first BasePart
+	return chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+end
+
 local function createESP(chest)
 	if espObjects[chest] then return end
-	local part = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+	local part = getChestPart(chest)
 	if not part then return end
 
 	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "ChestESP"
 	billboard.Adornee = part
 	billboard.Size = UDim2.new(0,150,0,50)
 	billboard.StudsOffset = Vector3.new(0,3,0)
 	billboard.AlwaysOnTop = true
 
-	local text = Instance.new("TextLabel")
-	text.Size = UDim2.new(1,0,1,0)
-	text.BackgroundTransparency = 1
-	text.Text = chest.Name
-	text.TextColor3 = CHEST_NAMES[chest.Name] or Color3.new(1,1,1)
-	text.TextScaled = true
-	text.Font = Enum.Font.GothamBold
-	text.Parent = billboard
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1,0,1,0)
+	label.BackgroundTransparency = 1
+	label.Text = chest.Name
+	label.TextColor3 = CHEST_NAMES[chest.Name] or Color3.new(1,1,1)
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	label.Parent = billboard
 
 	billboard.Parent = PigeonGui
 	espObjects[chest] = billboard
 end
 
--- Main loop
 RunService.RenderStepped:Connect(function()
 	if not chestESPEnabled then return end
 	if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
 	local hrpPos = plr.Character.HumanoidRootPart.Position
 
-	for _, obj in ipairs(workspace:GetChildren()) do
-		if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
-			local part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+	for _, chest in ipairs(workspace:GetChildren()) do
+		if chest:IsA("Model") and CHEST_NAMES[chest.Name] then
+			local part = getChestPart(chest)
 			if part then
 				local dist = (part.Position - hrpPos).Magnitude
 				if dist <= MAX_DISTANCE then
-					createESP(obj)
-				elseif espObjects[obj] then
-					espObjects[obj]:Destroy()
-					espObjects[obj] = nil
+					createESP(chest)
+				elseif espObjects[chest] then
+					espObjects[chest]:Destroy()
+					espObjects[chest] = nil
 				end
 
 				-- Remove ESP if chest is opening (transparency > 0)
-				if espObjects[obj] and part.Transparency > 0 then
-					espObjects[obj]:Destroy()
-					espObjects[obj] = nil
+				if espObjects[chest] and part.Transparency > 0 then
+					espObjects[chest]:Destroy()
+					espObjects[chest] = nil
 				end
 			end
 		end
 	end
 end)
+
