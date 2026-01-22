@@ -574,7 +574,7 @@ end)
 currentY = currentY + buttonHeight + padding
 
 -- ============================
--- CHEST ESP (Fully Functional, Misc Tab)
+-- CHEST ESP BUTTON IN MISC (WORKING)
 -- ============================
 
 local Players = game:GetService("Players")
@@ -603,7 +603,7 @@ local function createESP(model)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChestESP"
     billboard.Adornee = primary
-    billboard.Size = UDim2.new(0, 120, 0, 20)
+    billboard.Size = UDim2.new(0, 100, 0, 18)
     billboard.StudsOffset = Vector3.new(0, 2, 0)
     billboard.AlwaysOnTop = true
 
@@ -616,7 +616,7 @@ local function createESP(model)
     text.Font = Enum.Font.GothamBold
     text.TextStrokeTransparency = 0
     text.TextColor3 = CHEST_NAMES[model.Name] or Color3.new(1,1,1)
-    text.TextSize = 14
+    text.TextSize = 12
     text.TextXAlignment = Enum.TextXAlignment.Center
     text.TextYAlignment = Enum.TextYAlignment.Center
 
@@ -625,7 +625,7 @@ local function createESP(model)
     return billboard
 end
 
--- Update visibility based on distance
+-- Update ESP visibility
 local function updateESP()
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
     local hrpPos = player.Character.HumanoidRootPart.Position
@@ -649,7 +649,7 @@ local function updateESP()
     end
 end
 
--- Optimized update loop every 0.5s
+-- Update loop every 0.5s
 task.spawn(function()
     while true do
         updateESP()
@@ -658,19 +658,41 @@ task.spawn(function()
 end)
 
 -- ============================
--- ADD BUTTON TO MISC TAB
+-- CREATE BUTTON IN MISC TAB
 -- ============================
 
-local ChestToggleButton = addButton(MiscSection, "Chest ESP")
+-- Calculate a proper Y position at the bottom of existing buttons
+local function getNextButtonY(section)
+    local maxY = 0
+    for _, child in pairs(section:GetChildren()) do
+        if child:IsA("TextButton") then
+            local childBottom = child.Position.Y.Offset + child.Size.Y.Offset
+            if childBottom > maxY then
+                maxY = childBottom
+            end
+        end
+    end
+    return maxY + 5
+end
+
+local ChestToggleButton = Instance.new("TextButton")
+ChestToggleButton.Size = UDim2.new(0, 120, 0, 30)
+ChestToggleButton.Position = UDim2.new(0, 5, 0, getNextButtonY(MiscSection))
+ChestToggleButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
+ChestToggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+ChestToggleButton.Font = Enum.Font.GothamBold
+ChestToggleButton.TextSize = 14
+ChestToggleButton.Text = "Chest ESP"
+ChestToggleButton.Parent = MiscSection
+
 ChestToggleButton.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     ChestToggleButton.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
-
     if not espEnabled then
-        -- Clean up ESP
         for model, gui in pairs(espObjects) do
             if gui then gui:Destroy() end
         end
         espObjects = {}
     end
+end)
 end)
