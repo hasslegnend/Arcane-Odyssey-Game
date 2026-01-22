@@ -573,51 +573,41 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
-local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
 
-local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
-
+local espEnabled = false
+local espObjects = {}
+local MAX_DISTANCE = 5000
 local CHEST_NAMES = {
-	["Treasure Chest"] = Color3.fromRGB(255,255,255),
-	["Uncommon Chest"] = Color3.fromRGB(255,255,255),
-	["Rare Chest"] = Color3.fromRGB(255,255,255),
-	["Mystic Chest"] = Color3.fromRGB(255,0,0),
-	["Legendary Chest"] = Color3.fromRGB(0,255,0),
+	["Treasure Chest"] = Color3.new(1,1,1),
+	["Uncommon Chest"] = Color3.new(1,1,1),
+	["Rare Chest"] = Color3.new(1,1,1),
+	["Mystic Chest"] = Color3.new(1,0,0),
+	["Legendary Chest"] = Color3.new(0,1,0)
 }
 
-local MAX_DISTANCE = 5000
-local espObjects = {}
-local espEnabled = false
-
-local function createESP(model)
-	if espObjects[model] then return end
-
-	local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-	if not primary then return end
+local function createESP(chest)
+	if espObjects[chest] then return end -- already exists
 
 	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "ChestESP"
-	billboard.Adornee = primary
-	billboard.Size = UDim2.new(0,200,0,50)
+	billboard.Adornee = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+	billboard.Size = UDim2.new(0,100,0,50)
 	billboard.StudsOffset = Vector3.new(0,3,0)
 	billboard.AlwaysOnTop = true
+	billboard.Name = "ChestESP"
 
 	local text = Instance.new("TextLabel")
-	text.Parent = billboard
 	text.Size = UDim2.new(1,0,1,0)
 	text.BackgroundTransparency = 1
-	text.Text = model.Name
+	text.Text = chest.Name
+	text.TextColor3 = CHEST_NAMES[chest.Name] or Color3.new(1,1,1)
 	text.TextScaled = true
-	text.Font = Enum.Font.GothamBold
-	text.TextStrokeTransparency = 0
-	text.TextColor3 = CHEST_NAMES[model.Name]
+	text.Parent = billboard
 
-	billboard.Parent = model
-	espObjects[model] = billboard
+	billboard.Parent = player:WaitForChild("PlayerGui")
+	espObjects[chest] = billboard
 end
-
 
 RunService.RenderStepped:Connect(function()
 	if not espEnabled then return end
@@ -636,23 +626,23 @@ RunService.RenderStepped:Connect(function()
 					espObjects[obj]:Destroy()
 					espObjects[obj] = nil
 				end
+
+				-- Remove ESP if the chest starts opening (transparency > 0)
+				if espObjects[obj] and part.Transparency > 0 then
+					espObjects[obj]:Destroy()
+					espObjects[obj] = nil
+				end
 			end
 		end
 	end
-end)
 
-
-ChestToggle.MouseButton1Click:Connect(function()
-	espEnabled = not espEnabled
-	ChestToggle.BackgroundColor3 = espEnabled
-		and Color3.fromRGB(0,140,255)
-		or Color3.fromRGB(60,60,60)
-
-	if not espEnabled then
-		removeESP()
+	-- cleanup for destroyed chests
+	for model, gui in pairs(espObjects) do
+		if not model.Parent then
+			gui:Destroy()
+			espObjects[model] = nil
+		end
 	end
-
-	print("Chest ESP:", espEnabled)
 end)
 
 
