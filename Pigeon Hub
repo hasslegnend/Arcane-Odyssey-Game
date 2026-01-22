@@ -574,7 +574,7 @@ end)
 currentY = currentY + buttonHeight + padding
 
 -- ========================
--- CHEST ESP (Working Version)
+-- CHEST ESP
 -- ========================
 local ChestESPButton = addButton(MiscSection, "Chest ESP", Color3.fromRGB(60,60,60))
 local chestESPEnabled = false
@@ -603,7 +603,6 @@ ChestESPButton.MouseButton1Click:Connect(function()
 end)
 
 local function getChestPart(chest)
-	-- Try PrimaryPart first, otherwise first BasePart
 	return chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
 end
 
@@ -636,7 +635,7 @@ RunService.RenderStepped:Connect(function()
 	if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
 	local hrpPos = plr.Character.HumanoidRootPart.Position
 
-	for _, chest in ipairs(workspace:GetChildren()) do
+	for _, chest in ipairs(workspace:GetDescendants()) do
 		if chest:IsA("Model") and CHEST_NAMES[chest.Name] then
 			local part = getChestPart(chest)
 			if part then
@@ -648,7 +647,7 @@ RunService.RenderStepped:Connect(function()
 					espObjects[chest] = nil
 				end
 
-				-- Remove ESP if chest is opening (transparency > 0)
+				-- Remove ESP if chest is opening (any transparency > 0)
 				if espObjects[chest] and part.Transparency > 0 then
 					espObjects[chest]:Destroy()
 					espObjects[chest] = nil
@@ -657,4 +656,5 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
+
 
