@@ -573,10 +573,6 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
--- ============================
--- CHEST ESP BUTTON IN MISC (WORKING)
--- ============================
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
@@ -594,7 +590,7 @@ local CLOSE_DISTANCE = 20
 local espObjects = {}
 local espEnabled = false
 
--- Create ESP for a chest
+-- Create ESP for a chest model
 local function createESP(model)
     if espObjects[model] then return espObjects[model] end
     local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
@@ -604,7 +600,7 @@ local function createESP(model)
     billboard.Name = "ChestESP"
     billboard.Adornee = primary
     billboard.Size = UDim2.new(0, 100, 0, 18)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.StudsOffset = Vector3.new(0,2,0)
     billboard.AlwaysOnTop = true
 
     local text = Instance.new("TextLabel")
@@ -625,8 +621,21 @@ local function createESP(model)
     return billboard
 end
 
+-- Recursive scan of workspace
+local function getAllChests(parent)
+    local chests = {}
+    for _, child in pairs(parent:GetChildren()) do
+        if CHEST_NAMES[child.Name] then
+            table.insert(chests, child)
+        end
+        for _, c in pairs(getAllChests(child)) do
+            table.insert(chests, c)
+        end
+    end
+    return chests
+end
+
 -- Update ESP visibility
-local function updateESP()
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
     local hrpPos = player.Character.HumanoidRootPart.Position
 
@@ -649,19 +658,17 @@ local function updateESP()
     end
 end
 
--- Update loop every 0.5s
+-- Run the loop every 0.5s
 task.spawn(function()
     while true do
-        updateESP()
+        if espEnabled then
+            updateESP()
+        end
         task.wait(0.5)
     end
 end)
 
--- ============================
--- CREATE BUTTON IN MISC TAB
--- ============================
-
--- Calculate a proper Y position at the bottom of existing buttons
+-- ======== BUTTON IN MISC TAB ========
 local function getNextButtonY(section)
     local maxY = 0
     for _, child in pairs(section:GetChildren()) do
@@ -694,5 +701,4 @@ ChestToggleButton.MouseButton1Click:Connect(function()
         end
         espObjects = {}
     end
-end)
 end)
