@@ -590,7 +590,7 @@ local CLOSE_DISTANCE = 50
 local espObjects = {}
 local espEnabled = false
 
--- Create ESP if not already created
+-- Create ESP for a model (only once)
 local function createESP(model)
     if espObjects[model] then return espObjects[model] end
     local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
@@ -599,9 +599,10 @@ local function createESP(model)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChestESP"
     billboard.Adornee = primary
-    billboard.Size = UDim2.new(0, 100, 0, 20) -- much smaller
+    billboard.Size = UDim2.new(0, 120, 0, 20) -- fixed pixel size
     billboard.StudsOffset = Vector3.new(0,2,0)
     billboard.AlwaysOnTop = true
+    billboard.MaxDistance = MAX_DISTANCE -- will not render beyond this distance
 
     local text = Instance.new("TextLabel")
     text.Parent = billboard
@@ -612,7 +613,7 @@ local function createESP(model)
     text.Font = Enum.Font.GothamBold
     text.TextStrokeTransparency = 0
     text.TextColor3 = CHEST_NAMES[model.Name]
-    text.TextSize = 12 -- small text
+    text.TextSize = 14
     text.TextXAlignment = Enum.TextXAlignment.Center
     text.TextYAlignment = Enum.TextYAlignment.Center
 
@@ -621,7 +622,7 @@ local function createESP(model)
     return billboard
 end
 
--- Toggle visibility instead of creating/destroying every time
+-- Update visibility based on distance
 local function updateESP()
     if not espEnabled then return end
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
@@ -634,29 +635,31 @@ local function updateESP()
                 local dist = (primary.Position - hrpPos).Magnitude
                 local gui = createESP(model)
                 if gui then
-                    gui.Enabled = dist <= MAX_DISTANCE and dist > CLOSE_DISTANCE and model.Parent ~= nil
+                    gui.Enabled = dist <= MAX_DISTANCE and dist > CLOSE_DISTANCE
                 end
             end
         end
     end
 end
 
--- Run every 1 second (super low lag)
+-- Optimized loop: only runs every 0.5s
 task.spawn(function()
     while true do
         updateESP()
-        task.wait(1)
+        task.wait(0.5)
     end
 end)
 
--- Chest ESP toggle button
+-- Toggle button (attach to your MiscSection)
 local ChestToggle = addButton(MiscSection, "Chest ESP")
 ChestToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     ChestToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
     if not espEnabled then
-        for _, gui in pairs(espObjects) do
-            gui.Enabled = false
+        -- clean up to remove lag
+        for model, gui in pairs(espObjects) do
+            if gui then gui:Destroy()
         end
+        espObjects = {}
     end
 end)
