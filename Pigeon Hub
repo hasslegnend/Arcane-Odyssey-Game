@@ -576,9 +576,7 @@ currentY = currentY + buttonHeight + padding
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
 
--- Chest names + colors
 local CHEST_NAMES = {
     ["Treasure Chest"] = Color3.fromRGB(255,255,255),
     ["Uncommon Chest"] = Color3.fromRGB(255,255,255),
@@ -587,11 +585,12 @@ local CHEST_NAMES = {
     ["Legendary Chest"] = Color3.fromRGB(0,255,0),
 }
 
-local MAX_DISTANCE = 5000
+local MAX_DISTANCE = 5000      -- Only render ESP if within this distance
+local CLOSE_DISTANCE = 50      -- Hide ESP if player is very close
 local espObjects = {}
 local espEnabled = false
 
--- Create ESP
+-- Create ESP above a chest
 local function createESP(model)
     if espObjects[model] then return end
     local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
@@ -626,22 +625,21 @@ local function removeESP()
     table.clear(espObjects)
 end
 
--- Scan / Update ESP every frame
+-- Update ESP every frame
 RunService.RenderStepped:Connect(function()
     if not espEnabled then return end
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
     local hrpPos = player.Character.HumanoidRootPart.Position
 
-    -- Loop through all workspace children
     for _, obj in ipairs(workspace:GetChildren()) do
         if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
             local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
             if primary then
                 local dist = (primary.Position - hrpPos).Magnitude
 
-                -- Remove ESP if chest is too far or transparent (opened)
-                if dist > MAX_DISTANCE or primary.Transparency > 0.9 then
+                -- Remove ESP if too close or too far
+                if dist > MAX_DISTANCE or dist < CLOSE_DISTANCE then
                     if espObjects[obj] then
                         espObjects[obj]:Destroy()
                         espObjects[obj] = nil
@@ -654,7 +652,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Toggle chest ESP button
+-- Chest ESP toggle button
 local ChestToggle = addButton(MiscSection, "Chest ESP")
 ChestToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
