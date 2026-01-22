@@ -573,8 +573,8 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
-local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
 local CHEST_NAMES = {
@@ -590,30 +590,16 @@ local CLOSE_DISTANCE = 50
 local espObjects = {}
 local espEnabled = false
 
--- Recursive search for all chest models
-local function getChests(parent)
-    local chests = {}
-    for _, obj in pairs(parent:GetChildren()) do
-        if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
-            table.insert(chests, obj)
-        end
-        for _, child in pairs(getChests(obj)) do
-            table.insert(chests, child)
-        end
-    end
-    return chests
-end
-
--- Create ESP for a model
+-- Create ESP if not already created
 local function createESP(model)
-    if espObjects[model] then return end
+    if espObjects[model] then return espObjects[model] end
     local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
     if not primary then return end
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChestESP"
     billboard.Adornee = primary
-    billboard.Size = UDim2.new(0,100,0,25) -- smaller size
+    billboard.Size = UDim2.new(0, 100, 0, 20) -- much smaller
     billboard.StudsOffset = Vector3.new(0,2,0)
     billboard.AlwaysOnTop = true
 
@@ -622,58 +608,55 @@ local function createESP(model)
     text.Size = UDim2.new(1,0,1,0)
     text.BackgroundTransparency = 1
     text.Text = model.Name
-    text.TextScaled = true
+    text.TextScaled = false
     text.Font = Enum.Font.GothamBold
     text.TextStrokeTransparency = 0
     text.TextColor3 = CHEST_NAMES[model.Name]
-    text.TextSize = 14 -- smaller text
-    text.TextScaled = false
+    text.TextSize = 12 -- small text
+    text.TextXAlignment = Enum.TextXAlignment.Center
+    text.TextYAlignment = Enum.TextYAlignment.Center
 
     billboard.Parent = model
     espObjects[model] = billboard
+    return billboard
 end
 
--- Remove ESP
-local function removeESP(model)
-    if model and espObjects[model] then
-        espObjects[model]:Destroy()
-        espObjects[model] = nil
-    end
-end
+-- Toggle visibility instead of creating/destroying every time
+local function updateESP()
+    if not espEnabled then return end
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+    local hrpPos = player.Character.HumanoidRootPart.Position
 
-local function removeAllESP()
-    for model, _ in pairs(espObjects) do
-        removeESP(model)
-    end
-end
-
--- Optimized loop (runs every 1 second)
-task.spawn(function()
-    while true do
-        if espEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrpPos = player.Character.HumanoidRootPart.Position
-            local chests = getChests(workspace)
-
-            for _, chest in ipairs(chests) do
-                local primary = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
-                if primary then
-                    local dist = (primary.Position - hrpPos).Magnitude
-                    if dist > MAX_DISTANCE or dist < CLOSE_DISTANCE or not chest.Parent then
-                        removeESP(chest)
-                    else
-                        createESP(chest)
-                    end
+    for _, model in ipairs(workspace:GetChildren()) do
+        if CHEST_NAMES[model.Name] then
+            local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+            if primary then
+                local dist = (primary.Position - hrpPos).Magnitude
+                local gui = createESP(model)
+                if gui then
+                    gui.Enabled = dist <= MAX_DISTANCE and dist > CLOSE_DISTANCE and model.Parent ~= nil
                 end
             end
         end
-        task.wait(1) -- only updates once per second
+    end
+end
+
+-- Run every 1 second (super low lag)
+task.spawn(function()
+    while true do
+        updateESP()
+        task.wait(1)
     end
 end)
 
--- Toggle button
+-- Chest ESP toggle button
 local ChestToggle = addButton(MiscSection, "Chest ESP")
 ChestToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     ChestToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
-    if not espEnabled then removeAllESP() end
+    if not espEnabled then
+        for _, gui in pairs(espObjects) do
+            gui.Enabled = false
+        end
+    end
 end)
