@@ -580,7 +580,8 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
--- CHEST ESP INTEGRATION
+-- ==========================
+-- CHEST ESP INTEGRATION (Destroy within 20 studs)
 -- ==========================
 
 -- MISC TAB BUTTON
@@ -589,7 +590,6 @@ ChestToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
 
 -- ESP SETTINGS
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
 local CHEST_NAMES = {
@@ -636,7 +636,7 @@ local function createESP(model)
     return billboard
 end
 
--- Update ESP visibility
+-- Update ESP visibility and destroy close ones
 local function updateESP()
     if not espEnabled then return end
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
@@ -648,8 +648,15 @@ local function updateESP()
             if primary then
                 local dist = (primary.Position - hrpPos).Magnitude
                 local gui = createESP(model)
+
                 if gui then
-                    gui.Enabled = dist <= MAX_DISTANCE and dist > CLOSE_DISTANCE
+                    if dist > MAX_DISTANCE then
+                        gui:Destroy()
+                        espObjects[model] = nil
+                    elseif dist <= CLOSE_DISTANCE then
+                        gui:Destroy()
+                        espObjects[model] = nil
+                    end
                 end
             end
         end
