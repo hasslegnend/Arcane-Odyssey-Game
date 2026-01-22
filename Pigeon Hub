@@ -573,12 +573,11 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
--- CHEST ESP INTEGRATION
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
+-- Chest names and colors
 local CHEST_NAMES = {
     ["Treasure Chest"] = Color3.fromRGB(255,255,255),
     ["Uncommon Chest"] = Color3.fromRGB(255,255,255),
@@ -587,8 +586,8 @@ local CHEST_NAMES = {
     ["Legendary Chest"] = Color3.fromRGB(0,255,0),
 }
 
-local MAX_DISTANCE = 5000
-local CLOSE_DISTANCE = 20 -- disappear if player is this close
+local MAX_DISTANCE = 2000 -- changed from 5000
+local CLOSE_DISTANCE = 20 -- disappear if player is closer than this
 local espObjects = {}
 local espEnabled = false
 
@@ -601,7 +600,7 @@ local function createESP(model)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChestESP"
     billboard.Adornee = primary
-    billboard.Size = UDim2.new(0, 120, 0, 20) -- smaller size
+    billboard.Size = UDim2.new(0, 120, 0, 20) -- small text
     billboard.StudsOffset = Vector3.new(0, 2, 0)
     billboard.AlwaysOnTop = true
 
@@ -643,7 +642,7 @@ local function updateESP()
     end
 end
 
--- Run update every 0.5s to reduce lag
+-- Optimized update every 0.5s to reduce lag
 task.spawn(function()
     while true do
         updateESP()
@@ -651,13 +650,17 @@ task.spawn(function()
     end
 end)
 
--- ADD BUTTON INSIDE MISC TAB
-local ChestToggle = addButton(MiscSection, "Chest ESP")
-ChestToggle.MouseButton1Click:Connect(function()
+-- ============================
+-- ADD BUTTON TO MISC TAB
+-- ============================
+
+local ChestToggleButton = addButton(MiscSection, "Chest ESP") -- add inside your existing MiscSection
+ChestToggleButton.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
-    ChestToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
+    ChestToggleButton.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
 
     if not espEnabled then
+        -- Clean up ESP to prevent lag
         for model, gui in pairs(espObjects) do
             if gui then gui:Destroy() end
         end
