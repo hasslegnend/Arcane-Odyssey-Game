@@ -138,7 +138,11 @@ UIS.InputBegan:Connect(function(input,gp)
 end)
 
 -- GENERAL CONTROLS
-local currentY = padding
+local sectionY = {
+	General = 10,
+	Good = 10,
+	Misc = 10
+}
 
 -- WALK SPEED
 local WalkSpeedLabel = Instance.new("TextLabel")
