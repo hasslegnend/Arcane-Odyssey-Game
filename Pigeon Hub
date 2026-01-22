@@ -33,28 +33,31 @@ PigeonFrame.Draggable = true
 local function createSection()
 	local sec = Instance.new("ScrollingFrame")
 	sec.Parent = PigeonFrame
-	sec.Position = UDim2.new(0, 0, 0, 45)
-	sec.Size = UDim2.new(1, 0, 1, -45)
+	sec.Position = UDim2.new(0, 10, 0, 55)
+	sec.Size = UDim2.new(1, -20, 1, -65)
+
 	sec.CanvasSize = UDim2.new(0, 0, 0, 0)
-	sec.ScrollBarImageTransparency = 0.6
-	sec.BackgroundTransparency = 1
+	sec.ScrollBarImageTransparency = 0
+	sec.ScrollBarImageColor3 = Color3.fromRGB(90, 90, 90)
+	sec.ScrollBarThickness = 6
+
+	sec.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 	sec.BorderSizePixel = 0
 	sec.Visible = false
 	sec.AutomaticCanvasSize = Enum.AutomaticSize.None
 
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = sec
-	layout.Padding = UDim.new(0, 6)
+	-- Rounded corners
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 12)
+	corner.Parent = sec
 
-	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		sec.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
-	end)
-
-	local padding = Instance.new("UIPadding")
-	padding.Parent = sec
-	padding.PaddingLeft = UDim.new(0, 8)
-	padding.PaddingRight = UDim.new(0, 8)
-	padding.PaddingTop = UDim.new(0, 8)
+	-- Padding so content isn’t glued to edges
+	local pad = Instance.new("UIPadding")
+	pad.PaddingTop = UDim.new(0, 10)
+	pad.PaddingLeft = UDim.new(0, 10)
+	pad.PaddingRight = UDim.new(0, 10)
+	pad.PaddingBottom = UDim.new(0, 10)
+	pad.Parent = sec
 
 	return sec
 end
@@ -684,3 +687,12 @@ ChestToggle.MouseButton1Click:Connect(function()
 		espObjects = {}
 	end
 end)
+
+local function updateCanvas(section)
+	section.CanvasSize = UDim2.new(0, 0, 0, currentY + 20)
+end
+
+-- Call after building UI
+updateCanvas(GeneralSection)
+updateCanvas(GoodSection)
+updateCanvas(MiscSection)
