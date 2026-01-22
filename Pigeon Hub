@@ -580,7 +580,17 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
+-- CHEST ESP INTEGRATION
+-- ==========================
 
+-- MISC TAB BUTTON
+local ChestToggle = addButton(MiscSection, "Chest ESP")
+ChestToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
+
+-- ESP SETTINGS
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
 
 local CHEST_NAMES = {
     ["Treasure Chest"] = Color3.fromRGB(255,255,255),
@@ -595,17 +605,18 @@ local CLOSE_DISTANCE = 20
 local espObjects = {}
 local espEnabled = false
 
--- Create ESP for a chest model
+-- Create ESP
 local function createESP(model)
     if espObjects[model] then return espObjects[model] end
+
     local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
     if not primary then return end
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChestESP"
     billboard.Adornee = primary
-    billboard.Size = UDim2.new(0, 100, 0, 18)
-    billboard.StudsOffset = Vector3.new(0,2,0)
+    billboard.Size = UDim2.new(0, 120, 0, 20)
+    billboard.StudsOffset = Vector3.new(0,3,0)
     billboard.AlwaysOnTop = true
 
     local text = Instance.new("TextLabel")
@@ -613,11 +624,10 @@ local function createESP(model)
     text.Size = UDim2.new(1,0,1,0)
     text.BackgroundTransparency = 1
     text.Text = model.Name
-    text.TextScaled = false
     text.Font = Enum.Font.GothamBold
     text.TextStrokeTransparency = 0
     text.TextColor3 = CHEST_NAMES[model.Name] or Color3.new(1,1,1)
-    text.TextSize = 12
+    text.TextScaled = true
     text.TextXAlignment = Enum.TextXAlignment.Center
     text.TextYAlignment = Enum.TextYAlignment.Center
 
@@ -626,80 +636,38 @@ local function createESP(model)
     return billboard
 end
 
--- Recursive scan of workspace
-local function getAllChests(parent)
-    local chests = {}
-    for _, child in pairs(parent:GetChildren()) do
-        if CHEST_NAMES[child.Name] then
-            table.insert(chests, child)
-        end
-        for _, c in pairs(getAllChests(child)) do
-            table.insert(chests, c)
-        end
-    end
-    return chests
-end
-
 -- Update ESP visibility
+local function updateESP()
+    if not espEnabled then return end
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
     local hrpPos = player.Character.HumanoidRootPart.Position
 
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if CHEST_NAMES[obj.Name] then
-            local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+    for _, model in ipairs(workspace:GetDescendants()) do
+        if model:IsA("Model") and CHEST_NAMES[model.Name] then
+            local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
             if primary then
                 local dist = (primary.Position - hrpPos).Magnitude
-                if espEnabled then
-                    local gui = espObjects[obj] or createESP(obj)
-                    if gui then
-                        gui.Enabled = dist <= MAX_DISTANCE and dist > CLOSE_DISTANCE
-                    end
-                elseif espObjects[obj] then
-                    espObjects[obj]:Destroy()
-                    espObjects[obj] = nil
+                local gui = createESP(model)
+                if gui then
+                    gui.Enabled = dist <= MAX_DISTANCE and dist > CLOSE_DISTANCE
                 end
             end
         end
     end
 end
 
--- Run the loop every 0.5s
+-- Run every 1 second to reduce lag
 task.spawn(function()
     while true do
-        if espEnabled then
-            updateESP()
-        end
-        task.wait(0.5)
+        updateESP()
+        task.wait(1)
     end
 end)
 
--- ======== BUTTON IN MISC TAB ========
-local function getNextButtonY(section)
-    local maxY = 0
-    for _, child in pairs(section:GetChildren()) do
-        if child:IsA("TextButton") then
-            local childBottom = child.Position.Y.Offset + child.Size.Y.Offset
-            if childBottom > maxY then
-                maxY = childBottom
-            end
-        end
-    end
-    return maxY + 5
-end
-
-local ChestToggleButton = Instance.new("TextButton")
-ChestToggleButton.Size = UDim2.new(0, 120, 0, 30)
-ChestToggleButton.Position = UDim2.new(0, 5, 0, getNextButtonY(MiscSection))
-ChestToggleButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
-ChestToggleButton.TextColor3 = Color3.fromRGB(255,255,255)
-ChestToggleButton.Font = Enum.Font.GothamBold
-ChestToggleButton.TextSize = 14
-ChestToggleButton.Text = "Chest ESP"
-ChestToggleButton.Parent = MiscSection
-
-ChestToggleButton.MouseButton1Click:Connect(function()
+-- Toggle
+ChestToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
-    ChestToggleButton.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
+    ChestToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
     if not espEnabled then
         for model, gui in pairs(espObjects) do
             if gui then gui:Destroy() end
