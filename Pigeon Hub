@@ -573,41 +573,13 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
--- Label
-local ChestESPLabel = Instance.new("TextLabel")
-ChestESPLabel.Parent = MiscSection
-ChestESPLabel.Size = UDim2.new(0,140,0,buttonHeight)
-ChestESPLabel.Position = UDim2.new(0, padding, 0, currentY)
-ChestESPLabel.BackgroundTransparency = 1
-ChestESPLabel.Text = "Chest ESP:"
-ChestESPLabel.TextColor3 = Color3.fromRGB(255,255,255)
-ChestESPLabel.Font = Enum.Font.GothamBold
-ChestESPLabel.TextSize = 14
-ChestESPLabel.TextXAlignment = Enum.TextXAlignment.Left
-
--- Toggle
-local ChestESPToggle = Instance.new("TextButton")
-ChestESPToggle.Parent = MiscSection
-ChestESPToggle.Size = UDim2.new(0,30,0,buttonHeight)
-ChestESPToggle.Position = UDim2.new(0,150,0,currentY)
-ChestESPToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-ChestESPToggle.Text = ""
-ChestESPToggle.AutoButtonColor = false
-
---------------------------------------------------
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local ESP_RANGE = 5000
-local chestESPEnabled = false
-local chestBillboards = {}
-
--- Chest colors
-local CHESTS = {
+local CHEST_NAMES = {
 	["Treasure Chest"] = Color3.fromRGB(255,255,255),
 	["Uncommon Chest"] = Color3.fromRGB(255,255,255),
 	["Rare Chest"] = Color3.fromRGB(255,255,255),
@@ -615,96 +587,72 @@ local CHESTS = {
 	["Legendary Chest"] = Color3.fromRGB(0,255,0),
 }
 
-local function createChestESP(model)
-	if chestBillboards[model] then return end
+local MAX_DISTANCE = 5000
+local espObjects = {}
+local espEnabled = false
 
-	local part = model:FindFirstChildWhichIsA("BasePart")
-	if not part then return end
+local function createESP(model)
+	if espObjects[model] then return end
 
-	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.new(0,140,0,28)
-	gui.StudsOffset = Vector3.new(0,3,0)
-	gui.AlwaysOnTop = true
-	gui.Enabled = false
-	gui.Parent = part
+	local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+	if not primary then return end
 
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1,0,1,0)
-	label.BackgroundTransparency = 1
-	label.Text = model.Name
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 14
-	label.TextStrokeTransparency = 0
-	label.TextColor3 = CHESTS[model.Name] or Color3.new(1,1,1)
-	label.Parent = gui
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "ChestESP"
+	billboard.Adornee = primary
+	billboard.Size = UDim2.new(0,200,0,50)
+	billboard.StudsOffset = Vector3.new(0,3,0)
+	billboard.AlwaysOnTop = true
 
-	chestBillboards[model] = gui
+	local text = Instance.new("TextLabel")
+	text.Parent = billboard
+	text.Size = UDim2.new(1,0,1,0)
+	text.BackgroundTransparency = 1
+	text.Text = model.Name
+	text.TextScaled = true
+	text.Font = Enum.Font.GothamBold
+	text.TextStrokeTransparency = 0
+	text.TextColor3 = CHEST_NAMES[model.Name]
+
+	billboard.Parent = model
+	espObjects[model] = billboard
 end
 
--- Initial scan
-local function scanChests()
-	for _, obj in ipairs(workspace:GetDescendants()) do
-		if obj:IsA("Model") and CHESTS[obj.Name] then
-			createChestESP(obj)
-		end
-	end
-end
 
--- Distance check
 RunService.RenderStepped:Connect(function()
-	if not chestESPEnabled then return end
-	if not camera then return end
+	if not espEnabled then return end
+	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
-	for model, gui in pairs(chestBillboards) do
-		if model.Parent == nil then
-			gui:Destroy()
-			chestBillboards[model] = nil
-		else
-			local part = model:FindFirstChildWhichIsA("BasePart")
+	local hrp = player.Character.HumanoidRootPart.Position
+
+	for _, obj in ipairs(workspace:GetChildren()) do
+		if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
+			local part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
 			if part then
-				local dist = (camera.CFrame.Position - part.Position).Magnitude
-				gui.Enabled = dist <= ESP_RANGE
+				local dist = (part.Position - hrp).Magnitude
+				if dist <= MAX_DISTANCE then
+					createESP(obj)
+				elseif espObjects[obj] then
+					espObjects[obj]:Destroy()
+					espObjects[obj] = nil
+				end
 			end
 		end
 	end
 end)
 
--- New chests
-workspace.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and CHESTS[obj.Name] then
-		createChestESP(obj)
+
+ChestToggle.MouseButton1Click:Connect(function()
+	espEnabled = not espEnabled
+	ChestToggle.BackgroundColor3 = espEnabled
+		and Color3.fromRGB(0,140,255)
+		or Color3.fromRGB(60,60,60)
+
+	if not espEnabled then
+		removeESP()
 	end
+
+	print("Chest ESP:", espEnabled)
 end)
 
--- Toggle logic (THIS is what was missing/broken before)
-ChestESPToggle.MouseButton1Click:Connect(function()
-	chestESPEnabled = not chestESPEnabled
 
-	if chestESPEnabled then
-		ChestESPToggle.BackgroundColor3 = Color3.fromRGB(0,140,255)
-		scanChests()
-	else
-		ChestESPToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-		for _, gui in pairs(chestBillboards) do
-			gui.Enabled = false
-		end
-	end
-end)
-
-currentY = currentY + buttonHeight + padding
-
-
-local TestBtn = Instance.new("TextButton")
-TestBtn.Parent = MiscSection
-TestBtn.Size = UDim2.new(0,200,0,40)
-TestBtn.Position = UDim2.new(0,20,0,20)
-TestBtn.Text = "CLICK TEST"
-TestBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
-TestBtn.TextColor3 = Color3.new(1,1,1)
-TestBtn.Font = Enum.Font.GothamBold
-TestBtn.TextSize = 16
-
-TestBtn.MouseButton1Click:Connect(function()
-	TestBtn.BackgroundColor3 = Color3.fromRGB(0,255,0)
-	print("BUTTON CLICK WORKS")
-end)
