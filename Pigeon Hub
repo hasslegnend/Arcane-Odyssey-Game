@@ -571,7 +571,9 @@ BirdKillToggle.MouseButton1Click:Connect(function()
 	end
 end)
 
+currentY = currentY + buttonHeight + padding
 
+-- Label
 local ChestESPLabel = Instance.new("TextLabel")
 ChestESPLabel.Parent = MiscSection
 ChestESPLabel.Size = UDim2.new(0,140,0,buttonHeight)
@@ -583,7 +585,7 @@ ChestESPLabel.Font = Enum.Font.GothamBold
 ChestESPLabel.TextSize = 14
 ChestESPLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- Toggle Button
+-- Toggle
 local ChestESPToggle = Instance.new("TextButton")
 ChestESPToggle.Parent = MiscSection
 ChestESPToggle.Size = UDim2.new(0,30,0,buttonHeight)
@@ -592,30 +594,35 @@ ChestESPToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
 ChestESPToggle.Text = ""
 ChestESPToggle.AutoButtonColor = false
 
+--------------------------------------------------
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local CHEST_NAMES = {
-	["Treasure Chest"] = true,
-	["Uncommon Chest"] = true,
-	["Rare Chest"] = true,
-	["Mystic Chest"] = true,
-	["Legendary Chest"] = true
-}
-
 local ESP_RANGE = 5000
 local chestESPEnabled = false
-local chestESPObjects = {}
+local chestBillboards = {}
 
-local function createESP(model)
-	if chestESPObjects[model] then return end
+-- Chest colors
+local CHESTS = {
+	["Treasure Chest"] = Color3.fromRGB(255,255,255),
+	["Uncommon Chest"] = Color3.fromRGB(255,255,255),
+	["Rare Chest"] = Color3.fromRGB(255,255,255),
+	["Mystic Chest"] = Color3.fromRGB(255,0,0),
+	["Legendary Chest"] = Color3.fromRGB(0,255,0),
+}
+
+local function createChestESP(model)
+	if chestBillboards[model] then return end
 
 	local part = model:FindFirstChildWhichIsA("BasePart")
 	if not part then return end
 
 	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.new(0,120,0,30)
+	gui.Size = UDim2.new(0,140,0,28)
 	gui.StudsOffset = Vector3.new(0,3,0)
 	gui.AlwaysOnTop = true
 	gui.Enabled = false
@@ -625,31 +632,33 @@ local function createESP(model)
 	label.Size = UDim2.new(1,0,1,0)
 	label.BackgroundTransparency = 1
 	label.Text = model.Name
-	label.TextColor3 = Color3.fromRGB(255,215,0)
-	label.TextStrokeTransparency = 0
 	label.Font = Enum.Font.GothamBold
 	label.TextSize = 14
+	label.TextStrokeTransparency = 0
+	label.TextColor3 = CHESTS[model.Name] or Color3.new(1,1,1)
 	label.Parent = gui
 
-	chestESPObjects[model] = gui
+	chestBillboards[model] = gui
 end
 
+-- Initial scan
 local function scanChests()
 	for _, obj in ipairs(workspace:GetDescendants()) do
-		if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
-			createESP(obj)
+		if obj:IsA("Model") and CHESTS[obj.Name] then
+			createChestESP(obj)
 		end
 	end
 end
 
-local function updateESP()
+-- Distance check
+RunService.RenderStepped:Connect(function()
 	if not chestESPEnabled then return end
-	if not camera.CFrame then return end
+	if not camera then return end
 
-	for model, gui in pairs(chestESPObjects) do
+	for model, gui in pairs(chestBillboards) do
 		if model.Parent == nil then
 			gui:Destroy()
-			chestESPObjects[model] = nil
+			chestBillboards[model] = nil
 		else
 			local part = model:FindFirstChildWhichIsA("BasePart")
 			if part then
@@ -658,9 +667,16 @@ local function updateESP()
 			end
 		end
 	end
-end
+end)
 
+-- New chests
+workspace.DescendantAdded:Connect(function(obj)
+	if obj:IsA("Model") and CHESTS[obj.Name] then
+		createChestESP(obj)
+	end
+end)
 
+-- Toggle logic (THIS is what was missing/broken before)
 ChestESPToggle.MouseButton1Click:Connect(function()
 	chestESPEnabled = not chestESPEnabled
 
@@ -669,17 +685,9 @@ ChestESPToggle.MouseButton1Click:Connect(function()
 		scanChests()
 	else
 		ChestESPToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-		for _, gui in pairs(chestESPObjects) do
+		for _, gui in pairs(chestBillboards) do
 			gui.Enabled = false
 		end
-	end
-end)
-
-RunService.RenderStepped:Connect(updateESP)
-
-workspace.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
-		createESP(obj)
 	end
 end)
 
