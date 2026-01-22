@@ -1,5 +1,5 @@
 local plr = game.Players.LocalPlayer
-local PlayerGui = plr.PlayerGui
+local PlayerGui = plr:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
