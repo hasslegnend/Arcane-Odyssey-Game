@@ -630,19 +630,19 @@ local function updateESP()
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
     local hrpPos = player.Character.HumanoidRootPart.Position
 
-    for _, model in ipairs(workspace:GetChildren()) do
-        if CHEST_NAMES[model.Name] then
-            local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if CHEST_NAMES[obj.Name] then
+            local primary = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
             if primary then
                 local dist = (primary.Position - hrpPos).Magnitude
                 if espEnabled then
-                    local gui = espObjects[model] or createESP(model)
+                    local gui = espObjects[obj] or createESP(obj)
                     if gui then
                         gui.Enabled = dist <= MAX_DISTANCE and dist > CLOSE_DISTANCE
                     end
-                elseif espObjects[model] then
-                    espObjects[model]:Destroy()
-                    espObjects[model] = nil
+                elseif espObjects[obj] then
+                    espObjects[obj]:Destroy()
+                    espObjects[obj] = nil
                 end
             end
         end
