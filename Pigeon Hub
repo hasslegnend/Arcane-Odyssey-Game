@@ -573,10 +573,12 @@ end)
 
 currentY = currentY + buttonHeight + padding
 
-local RunService = game:GetService("RunService")
-local player = game.Players.LocalPlayer
-
--- === SETTINGS ===
+-- ========================
+-- CHEST ESP
+-- ========================
+local ChestESPButton = addButton(MiscSection, "Chest ESP", Color3.fromRGB(60,60,60))
+local chestESPEnabled = false
+local espObjects = {}
 local MAX_DISTANCE = 5000
 local CHEST_NAMES = {
 	["Treasure Chest"] = Color3.new(1,1,1),
@@ -586,45 +588,30 @@ local CHEST_NAMES = {
 	["Legendary Chest"] = Color3.new(0,1,0)
 }
 
-local espEnabled = false
-local espObjects = {}
-
--- === FIND MISC FRAME ===
-local miscFrame = player:WaitForChild("PlayerGui"):WaitForChild("AdminUI"):WaitForChild("Misc") -- adjust this path to your UI
-if not miscFrame then
-	warn("Misc frame not found!")
-	return
-end
-
--- === CREATE TOGGLE BUTTON ===
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(1,0,0,40)
-toggleButton.Position = UDim2.new(0,0,0,0)
-toggleButton.Text = "Chest ESP"
-toggleButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
-toggleButton.TextColor3 = Color3.new(1,1,1)
-toggleButton.TextScaled = true
-toggleButton.Font = Enum.Font.SourceSansBold
-toggleButton.Parent = miscFrame
-
-toggleButton.MouseButton1Click:Connect(function()
-	espEnabled = not espEnabled
-	toggleButton.BackgroundColor3 = espEnabled and Color3.new(0,1,0) or Color3.fromRGB(50,50,50)
+ChestESPButton.MouseButton1Click:Connect(function()
+	chestESPEnabled = not chestESPEnabled
+	if chestESPEnabled then
+		ChestESPButton.BackgroundColor3 = Color3.fromRGB(0,200,0)
+	else
+		ChestESPButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
+		for _, gui in pairs(espObjects) do
+			gui:Destroy()
+		end
+		espObjects = {}
+	end
 end)
 
--- === FUNCTION TO CREATE ESP LABEL ===
 local function createESP(chest)
 	if espObjects[chest] then return end
-
 	local part = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
 	if not part then return end
 
 	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "ChestESP"
 	billboard.Adornee = part
 	billboard.Size = UDim2.new(0,150,0,50)
 	billboard.StudsOffset = Vector3.new(0,3,0)
 	billboard.AlwaysOnTop = true
-	billboard.Name = "ChestESP"
 
 	local text = Instance.new("TextLabel")
 	text.Size = UDim2.new(1,0,1,0)
@@ -632,25 +619,17 @@ local function createESP(chest)
 	text.Text = chest.Name
 	text.TextColor3 = CHEST_NAMES[chest.Name] or Color3.new(1,1,1)
 	text.TextScaled = true
-	text.Font = Enum.Font.SourceSansBold
+	text.Font = Enum.Font.GothamBold
 	text.Parent = billboard
 
-	billboard.Parent = player.PlayerGui -- labels appear in player GUI
+	billboard.Parent = PigeonGui
 	espObjects[chest] = billboard
 end
 
--- === RENDER LOOP ===
 RunService.RenderStepped:Connect(function()
-	if not espEnabled then
-		for chest, gui in pairs(espObjects) do
-			gui:Destroy()
-		end
-		espObjects = {}
-		return
-	end
-
-	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-	local hrpPos = player.Character.HumanoidRootPart.Position
+	if not chestESPEnabled then return end
+	if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
+	local hrpPos = plr.Character.HumanoidRootPart.Position
 
 	for _, obj in ipairs(workspace:GetChildren()) do
 		if obj:IsA("Model") and CHEST_NAMES[obj.Name] then
