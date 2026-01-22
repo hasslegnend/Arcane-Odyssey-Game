@@ -574,6 +574,7 @@ end)
 currentY = currentY + buttonHeight + padding
 
 -- CHEST ESP INTEGRATION
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
@@ -600,7 +601,7 @@ local function createESP(model)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "ChestESP"
     billboard.Adornee = primary
-    billboard.Size = UDim2.new(0, 120, 0, 20) -- small size
+    billboard.Size = UDim2.new(0, 120, 0, 20) -- smaller size
     billboard.StudsOffset = Vector3.new(0, 2, 0)
     billboard.AlwaysOnTop = true
 
@@ -650,7 +651,7 @@ task.spawn(function()
     end
 end)
 
--- Add Chest ESP toggle to your MiscSection
+-- ADD BUTTON INSIDE MISC TAB
 local ChestToggle = addButton(MiscSection, "Chest ESP")
 ChestToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
