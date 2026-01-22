@@ -222,8 +222,6 @@ DisableSpeedBtn.MouseButton1Click:Connect(function()
 	WalkSpeedInput.Text = ""
 end)
 
-currentY = currentY + buttonHeight + padding
-
 -- FLIGHT
 local FlightLabel = Instance.new("TextLabel")
 FlightLabel.Parent = GeneralSection
@@ -311,8 +309,6 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
-currentY = currentY + buttonHeight + padding
-
 -- TELEPORT TO MOUSE
 local TpLabel = Instance.new("TextLabel")
 TpLabel.Parent = GeneralSection
@@ -353,8 +349,6 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
-currentY = currentY + buttonHeight + padding
-
 -- INFINITE JUMP
 local InfiniteJumpLabel = Instance.new("TextLabel")
 InfiniteJumpLabel.Parent = GeneralSection
@@ -391,8 +385,6 @@ UIS.JumpRequest:Connect(function()
 		end
 	end
 end)
-
-currentY = currentY + buttonHeight + padding
 
 -- NOCLIP
 local NoclipLabel = Instance.new("TextLabel")
@@ -432,8 +424,6 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
-currentY = currentY + buttonHeight + padding
-
 -- REMOVE INSANITY
 local RemoveLabel = Instance.new("TextLabel")
 RemoveLabel.Parent = GeneralSection
@@ -462,7 +452,6 @@ RemoveBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-currentY = currentY + buttonHeight + padding
 
 -- REMOVE FOG
 local RemoveFogLabel = Instance.new("TextLabel")
@@ -491,8 +480,6 @@ RemoveFogBtn.MouseButton1Click:Connect(function()
 		tempFolder.FogParticles:Destroy()
 	end
 end)
-
-currentY = currentY + buttonHeight + padding
 
 -- AUTO WASH
 local WashLabel = Instance.new("TextLabel")
@@ -538,9 +525,6 @@ WashToggle.MouseButton1Click:Connect(function()
 		WashToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
 	end
 end)
-
-currentY = currentY + buttonHeight + padding
-
 
 -- BirdKill Label
 local BirdKillLabel = Instance.new("TextLabel")
@@ -588,7 +572,6 @@ BirdKillToggle.MouseButton1Click:Connect(function()
 	end
 end)
 
-currentY = currentY + buttonHeight + padding
 
 -- ==========================
 -- CHEST ESP (OPTIMIZED + DESTROY @ 20 STUDS)
@@ -694,7 +677,7 @@ local function updateCanvas(section)
 	section.CanvasSize = UDim2.new(0, 0, 0, currentY + 20)
 end
 
--- Call after building UI
+
 updateCanvas(GeneralSection)
 updateCanvas(GoodSection)
 updateCanvas(MiscSection)
