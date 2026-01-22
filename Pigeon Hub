@@ -30,6 +30,26 @@ PigeonFrame.BorderColor3 = Color3.fromRGB(0, 0, 139)
 PigeonFrame.Selectable = true
 PigeonFrame.Draggable = true
 
+local function createTab(text, position)
+	local tab = Instance.new("TextButton")
+	tab.Parent = PigeonFrame
+	tab.Size = UDim2.new(0, 140, 0, 35)
+	tab.Position = position
+	tab.Text = text
+	tab.Font = Enum.Font.GothamBold
+	tab.TextSize = 14
+	tab.TextColor3 = Color3.fromRGB(255,255,255)
+	tab.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	tab.BorderSizePixel = 0
+	tab.AutoButtonColor = false
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = tab
+
+	return tab
+end
+
 local function createSection()
 	local sec = Instance.new("ScrollingFrame")
 	sec.Parent = PigeonFrame
