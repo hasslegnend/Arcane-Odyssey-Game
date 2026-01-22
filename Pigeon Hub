@@ -691,3 +691,20 @@ ChestESPToggle.MouseButton1Click:Connect(function()
 	end
 end)
 
+currentY = currentY + buttonHeight + padding
+
+
+local TestBtn = Instance.new("TextButton")
+TestBtn.Parent = MiscSection
+TestBtn.Size = UDim2.new(0,200,0,40)
+TestBtn.Position = UDim2.new(0,20,0,20)
+TestBtn.Text = "CLICK TEST"
+TestBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
+TestBtn.TextColor3 = Color3.new(1,1,1)
+TestBtn.Font = Enum.Font.GothamBold
+TestBtn.TextSize = 16
+
+TestBtn.MouseButton1Click:Connect(function()
+	TestBtn.BackgroundColor3 = Color3.fromRGB(0,255,0)
+	print("BUTTON CLICK WORKS")
+end)
