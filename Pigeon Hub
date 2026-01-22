@@ -587,11 +587,28 @@ local CHEST_NAMES = {
 	["Legendary Chest"] = Color3.new(0,1,0)
 }
 
+-- Toggle button in your UI
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0,150,0,50)
+toggleButton.Position = UDim2.new(0,10,0,10)
+toggleButton.Text = "Chest ESP"
+toggleButton.BackgroundColor3 = Color3.new(0.2,0.2,0.2)
+toggleButton.TextColor3 = Color3.new(1,1,1)
+toggleButton.Parent = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui") -- adjust if your UI has a folder
+
+toggleButton.MouseButton1Click:Connect(function()
+	espEnabled = not espEnabled
+	toggleButton.BackgroundColor3 = espEnabled and Color3.new(0,1,0) or Color3.new(0.2,0.2,0.2)
+end)
+
 local function createESP(chest)
 	if espObjects[chest] then return end -- already exists
 
+	local part = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+	if not part then return end
+
 	local billboard = Instance.new("BillboardGui")
-	billboard.Adornee = chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart")
+	billboard.Adornee = part
 	billboard.Size = UDim2.new(0,100,0,50)
 	billboard.StudsOffset = Vector3.new(0,3,0)
 	billboard.AlwaysOnTop = true
@@ -644,5 +661,3 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
-
-
