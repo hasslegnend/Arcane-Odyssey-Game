@@ -170,6 +170,38 @@ local function createLabelWithCheckbox(parent, text)
 	return checkbox
 end
 
+local function createRemoveRow(parent, text, onClick)
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, 0, 0, buttonHeight)
+	row.BackgroundTransparency = 1
+	row.Parent = parent
+
+	-- Label (left)
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0.7, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextColor3 = Color3.new(1,1,1)
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 14
+	label.Parent = row
+
+	-- Remove button (right)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 90, 0, 24)
+	btn.Position = UDim2.new(1, -95, 0.5, -12)
+	btn.Text = "Remove"
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 13
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+	btn.Parent = row
+
+	btn.MouseButton1Click:Connect(onClick)
+end
+
+
 
 
 local GeneralStuff = createTab("GENERAL", UDim2.new(0, padding, 0, padding))
@@ -477,15 +509,6 @@ RunService.Stepped:Connect(function()
 end)
 
 -- REMOVE INSANITY
-local RemoveLabel = Instance.new("TextLabel")
-RemoveLabel.Parent = GeneralSection
-RemoveLabel.Size = UDim2.new(0,120,0,buttonHeight)
-RemoveLabel.BackgroundTransparency = 1
-RemoveLabel.Text = "Remove Insanity:"
-RemoveLabel.TextColor3 = Color3.fromRGB(255,255,255)
-RemoveLabel.Font = Enum.Font.GothamBold
-RemoveLabel.TextSize = 14
-RemoveLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 createRemoveRow(GeneralSection, "Remove Insanity", function()
 	local temp = plr.PlayerGui:FindFirstChild("Temp")
@@ -494,12 +517,6 @@ createRemoveRow(GeneralSection, "Remove Insanity", function()
 	end
 end)
 
-RemoveBtn.MouseButton1Click:Connect(function()
-	local insanityScript = plr.PlayerGui:FindFirstChild("Temp")
-	if insanityScript and insanityScript:FindFirstChild("Insanity") then
-		insanityScript.Insanity:Destroy()
-	end
-end)
 
 
 -- REMOVE FOG
