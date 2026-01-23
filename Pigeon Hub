@@ -1,3 +1,4 @@
+-- SERVICES
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -12,7 +13,7 @@ local Gui = Instance.new("ScreenGui", plr.PlayerGui)
 Gui.Name = "PigeonGui"
 
 local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0, 560, 0, 520)
+Main.Size = UDim2.new(0, 560, 0, 540)
 Main.Position = UDim2.new(0.5,0,0.5,0)
 Main.AnchorPoint = Vector2.new(0.5,0.5)
 Main.BackgroundColor3 = Color3.fromRGB(18,18,18)
@@ -26,15 +27,9 @@ Top.Size = UDim2.new(1,0,0,40)
 Top.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Instance.new("UICorner", Top).CornerRadius = UDim.new(0,10)
 
-local Icon = Instance.new("ImageLabel", Top)
-Icon.Size = UDim2.new(0,24,0,24)
-Icon.Position = UDim2.new(0,10,0.5,-12)
-Icon.BackgroundTransparency = 1
-Icon.Image = ""
-
 local Title = Instance.new("TextLabel", Top)
-Title.Position = UDim2.new(0,44,0,0)
-Title.Size = UDim2.new(1,-44,1,0)
+Title.Position = UDim2.new(0,40,0,0)
+Title.Size = UDim2.new(1,-40,1,0)
 Title.BackgroundTransparency = 1
 Title.Text = "PigeonHub"
 Title.Font = FONT
@@ -65,9 +60,7 @@ local function newSection()
 	s.Visible = false
 	s.BackgroundColor3 = Color3.fromRGB(15,15,15)
 	Instance.new("UICorner", s).CornerRadius = UDim.new(0,8)
-
-	local l = Instance.new("UIListLayout", s)
-	l.Padding = UDim.new(0,8)
+	Instance.new("UIListLayout", s).Padding = UDim.new(0,8)
 	return s
 end
 
@@ -145,27 +138,95 @@ local function btn(r,x,t,c,cb)
 	b.MouseButton1Click:Connect(cb)
 end
 
--- WALK SPEED (MAIN)
+local function toggle(r, cb)
+	local bg = Instance.new("Frame", r)
+	bg.Size = UDim2.new(0,42,0,22)
+	bg.Position = UDim2.new(1,-50,0.5,-11)
+	bg.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	Instance.new("UICorner", bg).CornerRadius = UDim.new(1,0)
+
+	local knob = Instance.new("Frame", bg)
+	knob.Size = UDim2.new(0,18,0,18)
+	knob.Position = UDim2.new(0,2,0.5,-9)
+	knob.BackgroundColor3 = Color3.new(1,1,1)
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+
+	local state = false
+	bg.InputBegan:Connect(function()
+		state = not state
+		bg.BackgroundColor3 = state and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
+		knob.Position = state and UDim2.new(1,-20,0.5,-9) or UDim2.new(0,2,0.5,-9)
+		cb(state)
+	end)
+end
+
+-- MAIN FEATURES
+-- WalkSpeed
 do
 	local r = row(MainSec)
 	label(r,"Walk Speed")
 	local b = box(r,200,"16")
-
 	btn(r,280,"Apply",Color3.fromRGB(0,140,255),function()
 		local v = tonumber(b.Text)
 		if v and plr.Character then
 			plr.Character.Humanoid.WalkSpeed = v
 		end
 	end)
-
 	btn(r,360,"Reset",Color3.fromRGB(255,60,60),function()
-		if plr.Character then
-			plr.Character.Humanoid.WalkSpeed = 16
+		if plr.Character then plr.Character.Humanoid.WalkSpeed = 16 end
+	end)
+end
+
+-- Click TP
+do
+	local enabled = false
+	local r = row(MainSec)
+	label(r,"Click TP")
+	toggle(r,function(v) enabled = v end)
+
+	RunService.RenderStepped:Connect(function()
+		if enabled and UIS:IsKeyDown(Enum.KeyCode.LeftControl)
+		and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+		and plr.Character then
+			local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				local ray = workspace.CurrentCamera:ScreenPointToRay(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y)
+				hrp.CFrame = CFrame.new(ray.Origin + ray.Direction * 100)
+			end
 		end
 	end)
 end
 
--- FLIGHT (OP) — REAL OPTIONS
+-- Infinite Jump
+do
+	local enabled = false
+	local r = row(MainSec)
+	label(r,"Infinite Jump")
+	toggle(r,function(v) enabled = v end)
+	UIS.JumpRequest:Connect(function()
+		if enabled and plr.Character then
+			plr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+		end
+	end)
+end
+
+-- Noclip
+do
+	local enabled = false
+	local r = row(MainSec)
+	label(r,"Noclip")
+	toggle(r,function(v) enabled = v end)
+	RunService.Stepped:Connect(function()
+		if enabled and plr.Character then
+			for _,p in pairs(plr.Character:GetChildren()) do
+				if p:IsA("BasePart") then p.CanCollide = false end
+			end
+		end
+	end)
+end
+
+-- OP FEATURES
+-- Flight
 do
 	local flying = false
 	local speed = 50
@@ -181,108 +242,37 @@ do
 	end)
 
 	btn(r,360,"Reset",Color3.fromRGB(255,60,60),function()
-		speed = 50
-		b.Text = "50"
 		flying = false
 		if bv then bv:Destroy() bv=nil end
 	end)
 
 	RunService.RenderStepped:Connect(function()
-		if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-			if not bv then
-				bv = Instance.new("BodyVelocity", plr.Character.HumanoidRootPart)
-				bv.MaxForce = Vector3.new(1e6,1e6,1e6)
-			end
-			local cam = workspace.CurrentCamera
-			local dir = Vector3.zero
-			if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
-			if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
-			if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
-			if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
-			bv.Velocity = dir * speed
-		end
-	end)
-end
-
--- INFINITE JUMP
-do
-	local enabled = false
-	local row = createRow()
-	createLabel(row, "Infinite Jump")
-	createToggle(row, function(v) enabled = v end)
-
-	UIS.JumpRequest:Connect(function()
-		if enabled and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-			plr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-		end
-	end)
-end
-
--- NOCLIP
-do
-	local enabled = false
-	local row = createRow()
-	createLabel(row, "Noclip")
-	createToggle(row, function(v) enabled = v end)
-
-	RunService.Stepped:Connect(function()
-		if enabled and plr.Character then
-			for _,p in pairs(plr.Character:GetChildren()) do
-				if p:IsA("BasePart") then p.CanCollide = false end
-			end
-		end
-	end)
-end
-
--- REMOVE INSANITY
-do
-	local row = createRow()
-	createLabel(row, "Remove Insanity")
-	createButton(row, 350, "Remove", Color3.fromRGB(90,90,90), function()
-		local t = plr.PlayerGui:FindFirstChild("Temp")
-		if t and t:FindFirstChild("Insanity") then t.Insanity:Destroy() end
-	end)
-end
-
--- REMOVE FOG
-do
-	local row = createRow()
-	createLabel(row, "Remove Fog")
-	createButton(row, 350, "Remove", Color3.fromRGB(90,90,90), function()
-		local t = plr.PlayerGui:FindFirstChild("Temp")
-		if t and t:FindFirstChild("FogParticles") then t.FogParticles:Destroy() end
-	end)
-end
-
--- AUTO WASH
-do
-	local enabled = false
-	local row = createRow()
-	createLabel(row, "Auto Wash")
-
-	createToggle(row, function(v)
-		enabled = v
-		if v then
-			task.spawn(function()
-				local remote = game.ReplicatedStorage.RS.Remotes.Boats.Wash
-				while enabled do
-					remote:FireServer()
-					task.wait(2)
+		if flying and plr.Character then
+			local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				if not bv then
+					bv = Instance.new("BodyVelocity", hrp)
+					bv.MaxForce = Vector3.new(1e6,1e6,1e6)
 				end
-			end)
+				local cam = workspace.CurrentCamera
+				local dir = Vector3.zero
+				if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
+				if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
+				if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
+				if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
+				bv.Velocity = dir * speed
+			end
 		end
 	end)
 end
 
--- AUTO BIRDKILL
+-- Auto BirdKill
 do
 	local enabled = false
-	local row = createRow()
-	createLabel(row, "Auto BirdKill")
-
+	local r = row(OpSec)
+	label(r,"Auto BirdKill")
 	local remote = game.ReplicatedStorage.RS.Remotes.Misc.BirdKill
-
-	createToggle(row, function(v)
+	toggle(r,function(v)
 		enabled = v
 		if v then
 			task.spawn(function()
@@ -295,60 +285,89 @@ do
 	end)
 end
 
--- CHEST ESP
+-- MISC
+-- Remove Insanity
+do
+	local r = row(MiscSec)
+	label(r,"Remove Insanity")
+	btn(r,360,"Remove",Color3.fromRGB(90,90,90),function()
+		local t = plr.PlayerGui:FindFirstChild("Temp")
+		if t and t:FindFirstChild("Insanity") then t.Insanity:Destroy() end
+	end)
+end
+
+-- Remove Fog
+do
+	local r = row(MiscSec)
+	label(r,"Remove Fog")
+	btn(r,360,"Remove",Color3.fromRGB(90,90,90),function()
+		local t = plr.PlayerGui:FindFirstChild("Temp")
+		if t and t:FindFirstChild("FogParticles") then t.FogParticles:Destroy() end
+	end)
+end
+
+-- Auto Wash
+do
+	local enabled = false
+	local r = row(MiscSec)
+	label(r,"Auto Wash")
+	local remote = game.ReplicatedStorage.RS.Remotes.Boats.Wash
+	toggle(r,function(v)
+		enabled = v
+		if v then
+			task.spawn(function()
+				while enabled do
+					remote:FireServer()
+					task.wait(2)
+				end
+			end)
+		end
+	end)
+end
+
+-- Chest ESP
 do
 	local enabled = false
 	local esp = {}
-
 	local CHESTS = {
-		["Treasure Chest"] = Color3.new(1,1,1),
-		["Uncommon Chest"] = Color3.new(1,1,1),
-		["Rare Chest"] = Color3.new(1,1,1),
-		["Mystic Chest"] = Color3.fromRGB(255,0,0),
-		["Legendary Chest"] = Color3.fromRGB(0,255,0),
+		["Treasure Chest"]=true,["Uncommon Chest"]=true,
+		["Rare Chest"]=true,["Mystic Chest"]=true,["Legendary Chest"]=true
 	}
 
-	local function clear()
-		for _,g in pairs(esp) do if g then g:Destroy() end end
-		esp = {}
-	end
-
-	local row = createRow()
-	createLabel(row, "Chest ESP")
-
-	createToggle(row, function(v)
+	local r = row(MiscSec)
+	label(r,"Chest ESP")
+	toggle(r,function(v)
 		enabled = v
-		if not v then clear() end
+		if not v then
+			for _,g in pairs(esp) do if g then g:Destroy() end end
+			esp={}
+		end
 	end)
 
 	task.spawn(function()
 		while true do
-			if enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-				local pos = plr.Character.HumanoidRootPart.Position
-				for _,m in ipairs(workspace:GetDescendants()) do
-					if m:IsA("Model") and CHESTS[m.Name] then
-						local p = m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart")
-						if p and (p.Position - pos).Magnitude < 2000 then
-							if not esp[m] then
-								local bb = Instance.new("BillboardGui", m)
-								bb.Size = UDim2.new(0,100,0,18)
-								bb.AlwaysOnTop = true
-								bb.Adornee = p
-								bb.StudsOffset = Vector3.new(0,2.5,0)
-
-								local t = Instance.new("TextLabel", bb)
-								t.Size = UDim2.new(1,0,1,0)
-								t.BackgroundTransparency = 1
-								t.Text = m.Name
-								t.Font = FONT
-								t.TextSize = 13
-								t.TextColor3 = CHESTS[m.Name]
-
-								esp[m] = bb
+			if enabled and plr.Character then
+				local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					for _,m in pairs(workspace:GetDescendants()) do
+						if m:IsA("Model") and CHESTS[m.Name] then
+							local p = m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart")
+							if p and (p.Position-hrp.Position).Magnitude < 2000 then
+								if not esp[m] then
+									local bb = Instance.new("BillboardGui", m)
+									bb.Size = UDim2.new(0,100,0,18)
+									bb.AlwaysOnTop = true
+									bb.Adornee = p
+									local t = Instance.new("TextLabel", bb)
+									t.Size = UDim2.new(1,0,1,0)
+									t.BackgroundTransparency = 1
+									t.Text = m.Name
+									t.Font = FONT
+									t.TextSize = 13
+									t.TextColor3 = Color3.new(1,1,1)
+									esp[m]=bb
+								end
 							end
-						elseif esp[m] then
-							esp[m]:Destroy()
-							esp[m] = nil
 						end
 					end
 				end
