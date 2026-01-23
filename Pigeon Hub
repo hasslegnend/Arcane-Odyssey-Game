@@ -520,27 +520,12 @@ end)
 
 
 -- REMOVE FOG
-local RemoveFogLabel = Instance.new("TextLabel")
-RemoveFogLabel.Parent = GeneralSection
-RemoveFogLabel.Size = UDim2.new(0,140,0,buttonHeight)
-RemoveFogLabel.BackgroundTransparency = 1
-RemoveFogLabel.Text = "Remove Fog:"
-RemoveFogLabel.TextColor3 = Color3.fromRGB(255,255,255)
-RemoveFogLabel.Font = Enum.Font.GothamBold
-RemoveFogLabel.TextSize = 14
-RemoveFogLabel.TextXAlignment = Enum.TextXAlignment.Left
+
 
 createRemoveRow(GeneralSection, "Remove Fog", function()
 	local temp = plr.PlayerGui:FindFirstChild("Temp")
 	if temp and temp:FindFirstChild("FogParticles") then
 		temp.FogParticles:Destroy()
-	end
-end)
-
-RemoveFogBtn.MouseButton1Click:Connect(function()
-	local tempFolder = plr.PlayerGui:FindFirstChild("Temp")
-	if tempFolder and tempFolder:FindFirstChild("FogParticles") then
-		tempFolder.FogParticles:Destroy()
 	end
 end)
 
