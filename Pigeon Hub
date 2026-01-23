@@ -82,6 +82,65 @@ local function createSection()
 	return sec
 end
 
+local function createRow(parent, labelText)
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, 0, 0, buttonHeight)
+	row.BackgroundTransparency = 1
+	row.Parent = parent
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0, 130, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = labelText
+	label.TextColor3 = Color3.fromRGB(255,255,255)
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 14
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = row
+
+	return row
+end
+
+local function createCheckbox(row, x)
+	local box = Instance.new("TextButton")
+	box.Size = UDim2.new(0, 30, 1, 0)
+	box.Position = UDim2.new(0, x, 0, 0)
+	box.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	box.Text = ""
+	box.AutoButtonColor = false
+	box.Parent = row
+	return box
+end
+
+local function createInput(row, x, placeholder)
+	local input = Instance.new("TextBox")
+	input.Size = UDim2.new(0, 80, 1, 0)
+	input.Position = UDim2.new(0, x, 0, 0)
+	input.PlaceholderText = placeholder
+	input.Text = ""
+	input.TextColor3 = Color3.fromRGB(255,255,255)
+	input.Font = Enum.Font.Gotham
+	input.TextSize = 14
+	input.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	input.ClearTextOnFocus = false
+	input.Parent = row
+	return input
+end
+
+local function createButton(row, x, text, color)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 80, 1, 0)
+	btn.Position = UDim2.new(0, x, 0, 0)
+	btn.Text = text
+	btn.BackgroundColor3 = color
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.Parent = row
+	return btn
+end
+
+
 
 local function createLabelWithCheckbox(parent, text)
 	local container = Instance.new("Frame")
@@ -194,102 +253,30 @@ local sectionY = {
 }
 
 -- WALK SPEED
-local WalkSpeedLabel = Instance.new("TextLabel")
-WalkSpeedLabel.Parent = GeneralSection
-WalkSpeedLabel.Size = UDim2.new(0,120,0,buttonHeight)
-WalkSpeedLabel.BackgroundTransparency = 1
-WalkSpeedLabel.Text = "Walk Speed:"
-WalkSpeedLabel.TextColor3 = Color3.fromRGB(255,255,255)
-WalkSpeedLabel.Font = Enum.Font.GothamBold
-WalkSpeedLabel.TextSize = 14
-WalkSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local WalkSpeedInput = Instance.new("TextBox")
-WalkSpeedInput.Parent = GeneralSection
-WalkSpeedInput.Size = UDim2.new(0,80,0,buttonHeight)
-WalkSpeedInput.PlaceholderText = "16"
-WalkSpeedInput.Text = ""
-WalkSpeedInput.TextColor3 = Color3.fromRGB(255,255,255)
-WalkSpeedInput.Font = Enum.Font.Gotham
-WalkSpeedInput.TextSize = 14
-WalkSpeedInput.BackgroundColor3 = Color3.fromRGB(60,60,60)
-WalkSpeedInput.ClearTextOnFocus = false
-
-local ApplySpeedBtn = Instance.new("TextButton")
-ApplySpeedBtn.Parent = GeneralSection
-ApplySpeedBtn.Size = UDim2.new(0,80,0,buttonHeight)
-ApplySpeedBtn.Text = "Apply"
-ApplySpeedBtn.BackgroundColor3 = Color3.fromRGB(0,140,255)
-ApplySpeedBtn.TextColor3 = Color3.fromRGB(255,255,255)
-ApplySpeedBtn.Font = Enum.Font.GothamBold
-ApplySpeedBtn.TextSize = 14
-
-local DisableSpeedBtn = Instance.new("TextButton")
-DisableSpeedBtn.Parent = GeneralSection
-DisableSpeedBtn.Size = UDim2.new(0,80,0,buttonHeight)
-DisableSpeedBtn.Text = "Disable"
-DisableSpeedBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
-DisableSpeedBtn.TextColor3 = Color3.fromRGB(255,255,255)
-DisableSpeedBtn.Font = Enum.Font.GothamBold
-DisableSpeedBtn.TextSize = 14
+local wsRow = createRow(GeneralSection, "Walk Speed:")
+local WalkSpeedInput = createInput(wsRow, 140, "16")
+local ApplySpeedBtn = createButton(wsRow, 230, "Apply", Color3.fromRGB(0,140,255))
+local DisableSpeedBtn = createButton(wsRow, 320, "Disable", Color3.fromRGB(255,0,0))
 
 ApplySpeedBtn.MouseButton1Click:Connect(function()
 	local speed = tonumber(WalkSpeedInput.Text)
-	if speed then
-		local char = plr.Character
-		if char and char:FindFirstChild("Humanoid") then
-			char.Humanoid.WalkSpeed = speed
-		end
+	if speed and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+		plr.Character.Humanoid.WalkSpeed = speed
 	end
 end)
 
 DisableSpeedBtn.MouseButton1Click:Connect(function()
-	local char = plr.Character
-	if char and char:FindFirstChild("Humanoid") then
-		char.Humanoid.WalkSpeed = 16
+	if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+		plr.Character.Humanoid.WalkSpeed = 16
 	end
 	WalkSpeedInput.Text = ""
 end)
 
 -- FLIGHT
-local FlightLabel = Instance.new("TextLabel")
-FlightLabel.Parent = GeneralSection
-FlightLabel.Size = UDim2.new(0,120,0,buttonHeight)
-FlightLabel.BackgroundTransparency = 1
-FlightLabel.Text = "Flight Speed:"
-FlightLabel.TextColor3 = Color3.fromRGB(255,255,255)
-FlightLabel.Font = Enum.Font.GothamBold
-FlightLabel.TextSize = 14
-FlightLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local FlightInput = Instance.new("TextBox")
-FlightInput.Parent = GeneralSection
-FlightInput.Size = UDim2.new(0,80,0,buttonHeight)
-FlightInput.PlaceholderText = "50"
-FlightInput.Text = ""
-FlightInput.TextColor3 = Color3.fromRGB(255,255,255)
-FlightInput.Font = Enum.Font.Gotham
-FlightInput.TextSize = 14
-FlightInput.BackgroundColor3 = Color3.fromRGB(60,60,60)
-FlightInput.ClearTextOnFocus = false
-
-local ApplyFlightBtn = Instance.new("TextButton")
-ApplyFlightBtn.Parent = GeneralSection
-ApplyFlightBtn.Size = UDim2.new(0,80,0,buttonHeight)
-ApplyFlightBtn.Text = "Apply"
-ApplyFlightBtn.BackgroundColor3 = Color3.fromRGB(0,140,255)
-ApplyFlightBtn.TextColor3 = Color3.fromRGB(255,255,255)
-ApplyFlightBtn.Font = Enum.Font.GothamBold
-ApplyFlightBtn.TextSize = 14
-
-local DisableFlightBtn = Instance.new("TextButton")
-DisableFlightBtn.Parent = GeneralSection
-DisableFlightBtn.Size = UDim2.new(0,80,0,buttonHeight)
-DisableFlightBtn.Text = "Disable"
-DisableFlightBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
-DisableFlightBtn.TextColor3 = Color3.fromRGB(255,255,255)
-DisableFlightBtn.Font = Enum.Font.GothamBold
-DisableFlightBtn.TextSize = 14
+local flightRow = createRow(GeneralSection, "Flight Speed:")
+local FlightInput = createInput(flightRow, 140, "50")
+local ApplyFlightBtn = createButton(flightRow, 230, "Apply", Color3.fromRGB(0,140,255))
+local DisableFlightBtn = createButton(flightRow, 320, "Disable", Color3.fromRGB(255,0,0))
 
 local flying = false
 local flightSpeed = 50
@@ -339,22 +326,9 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- TELEPORT TO MOUSE
-local TpLabel = Instance.new("TextLabel")
-TpLabel.Parent = GeneralSection
-TpLabel.Size = UDim2.new(0,160,0,buttonHeight)
-TpLabel.BackgroundTransparency = 1
-TpLabel.Text = "Teleport to Mouse:"
-TpLabel.TextColor3 = Color3.fromRGB(255,255,255)
-TpLabel.Font = Enum.Font.GothamBold
-TpLabel.TextSize = 14
-TpLabel.TextXAlignment = Enum.TextXAlignment.Left
+local tpRow = createRow(GeneralSection, "Teleport to Mouse:")
+local TpCheckbox = createCheckbox(tpRow, 140)
 
-local TpCheckbox = Instance.new("TextButton")
-TpCheckbox.Parent = GeneralSection
-TpCheckbox.Size = UDim2.new(0,30,0,buttonHeight)
-TpCheckbox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-TpCheckbox.Text = ""
-TpCheckbox.AutoButtonColor = false
 
 local TpEnabled = false
 TpCheckbox.MouseButton1Click:Connect(function()
@@ -379,22 +353,9 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- INFINITE JUMP
-local InfiniteJumpLabel = Instance.new("TextLabel")
-InfiniteJumpLabel.Parent = GeneralSection
-InfiniteJumpLabel.Size = UDim2.new(0,120,0,buttonHeight)
-InfiniteJumpLabel.BackgroundTransparency = 1
-InfiniteJumpLabel.Text = "Infinite Jump:"
-InfiniteJumpLabel.TextColor3 = Color3.fromRGB(255,255,255)
-InfiniteJumpLabel.Font = Enum.Font.GothamBold
-InfiniteJumpLabel.TextSize = 14
-InfiniteJumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+local ijRow = createRow(GeneralSection, "Infinite Jump:")
+local InfiniteJumpBox = createCheckbox(ijRow, 140)
 
-local InfiniteJumpBox = Instance.new("TextButton")
-InfiniteJumpBox.Parent = GeneralSection
-InfiniteJumpBox.Size = UDim2.new(0,30,0,buttonHeight)
-InfiniteJumpBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-InfiniteJumpBox.Text = ""
-InfiniteJumpBox.AutoButtonColor = false
 
 local infiniteJumpEnabled = false
 InfiniteJumpBox.MouseButton1Click:Connect(function()
@@ -416,22 +377,8 @@ UIS.JumpRequest:Connect(function()
 end)
 
 -- NOCLIP
-local NoclipLabel = Instance.new("TextLabel")
-NoclipLabel.Parent = GeneralSection
-NoclipLabel.Size = UDim2.new(0,120,0,buttonHeight)
-NoclipLabel.BackgroundTransparency = 1
-NoclipLabel.Text = "Noclip:"
-NoclipLabel.TextColor3 = Color3.fromRGB(255,255,255)
-NoclipLabel.Font = Enum.Font.GothamBold
-NoclipLabel.TextSize = 14
-NoclipLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local NoclipBox = Instance.new("TextButton")
-NoclipBox.Parent = GeneralSection
-NoclipBox.Size = UDim2.new(0,30,0,buttonHeight)
-NoclipBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-NoclipBox.Text = ""
-NoclipBox.AutoButtonColor = false
+local ncRow = createRow(GeneralSection, "Noclip:")
+local NoclipBox = createCheckbox(ncRow, 140)
 
 local noclipEnabled = false
 NoclipBox.MouseButton1Click:Connect(function()
@@ -511,22 +458,9 @@ RemoveFogBtn.MouseButton1Click:Connect(function()
 end)
 
 -- AUTO WASH
-local WashLabel = Instance.new("TextLabel")
-WashLabel.Parent = GeneralSection
-WashLabel.Size = UDim2.new(0,120,0,buttonHeight)
-WashLabel.BackgroundTransparency = 1
-WashLabel.Text = "Auto Wash:"
-WashLabel.TextColor3 = Color3.fromRGB(255,255,255)
-WashLabel.Font = Enum.Font.GothamBold
-WashLabel.TextSize = 14
-WashLabel.TextXAlignment = Enum.TextXAlignment.Left
+local washRow = createRow(GeneralSection, "Auto Wash:")
+local WashToggle = createCheckbox(washRow, 140)
 
-local WashToggle = Instance.new("TextButton")
-WashToggle.Parent = GeneralSection
-WashToggle.Size = UDim2.new(0,30,0,buttonHeight)
-WashToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-WashToggle.Text = ""
-WashToggle.AutoButtonColor = false
 
 local washEnabled = false
 local washThread = nil
@@ -556,17 +490,8 @@ WashToggle.MouseButton1Click:Connect(function()
 end)
 
 -- BirdKill Label
-local BirdKillLabel = Instance.new("TextLabel")
-BirdKillLabel.Parent = GeneralSection
-BirdKillLabel.Size = UDim2.new(0,140,0,buttonHeight)
-BirdKillLabel.BackgroundTransparency = 1
-BirdKillLabel.Text = "Auto BirdKill:"
-BirdKillLabel.TextColor3 = Color3.fromRGB(255,255,255)
-BirdKillLabel.Font = Enum.Font.GothamBold
-BirdKillLabel.TextSize = 14
-BirdKillLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local BirdKillToggle = createLabelWithCheckbox(GeneralSection, "Auto BirdKill")
+local birdRow = createRow(GeneralSection, "Auto BirdKill:")
+local BirdKillToggle = createCheckbox(birdRow, 140)
 
 -- Logic
 local birdKillEnabled = false
