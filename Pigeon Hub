@@ -188,6 +188,10 @@ local function toggleRow(parent, name, allowKeybind, callback)
 	end
 end
 
+local chestESPEnabled = false
+local birdKillEnabled = false
+local autoWashEnabled = false
+
 -- ===== FEATURES =====
 
 -- WALK SPEED
