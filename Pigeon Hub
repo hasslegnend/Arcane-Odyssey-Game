@@ -18,14 +18,13 @@ Main.Size = UDim2.new(0, 480, 0, 650)
 Main.Position = UDim2.new(0.5,0,0.5,0)
 Main.AnchorPoint = Vector2.new(0.5,0.5)
 Main.BackgroundColor3 = Color3.fromRGB(20,20,20)
-Main.Draggable = true
 Main.Active = true
+Main.Draggable = true
 
 -- SECTION
 local Section = Instance.new("ScrollingFrame", Main)
 Section.Position = UDim2.new(0,10,0,50)
 Section.Size = UDim2.new(1,-20,1,-60)
-Section.CanvasSize = UDim2.new(0,0,0,0)
 Section.AutomaticCanvasSize = Enum.AutomaticSize.Y
 Section.ScrollBarThickness = 6
 Section.BackgroundColor3 = Color3.fromRGB(15,15,15)
@@ -48,7 +47,7 @@ local function createLabel(row, text)
 	l.Text = text
 	l.Font = FONT
 	l.TextSize = 14
-	l.TextXAlignment = Left
+	l.TextXAlignment = Enum.TextXAlignment.Left
 	l.TextColor3 = Color3.new(1,1,1)
 end
 
@@ -66,7 +65,8 @@ local function createToggle(row, callback)
 	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
 
 	local state = false
-	bg.InputBegan:Connect(function()
+	bg.InputBegan:Connect(function(i)
+		if i.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
 		state = not state
 		bg.BackgroundColor3 = state and Color3.fromRGB(140,0,255) or Color3.fromRGB(60,60,60)
 		knob.Position = state and UDim2.new(1,-20,0.5,-9) or UDim2.new(0,2,0.5,-9)
@@ -123,7 +123,7 @@ do
 	createLabel(row, "Flight")
 	createToggle(row, function(v)
 		flying = v
-		if not v and bv then bv:Destroy() end
+		if not v and bv then bv:Destroy() bv = nil end
 	end)
 
 	RunService.RenderStepped:Connect(function()
@@ -193,24 +193,17 @@ do
 	end)
 end
 
+-- AUTO WASH
 do
 	local enabled = false
-	local thread
-
 	local row = createRow()
 	createLabel(row, "Auto Wash")
 
 	createToggle(row, function(v)
 		enabled = v
-
 		if v then
-			thread = task.spawn(function()
-				local remote = game.ReplicatedStorage
-					:WaitForChild("RS")
-					:WaitForChild("Remotes")
-					:WaitForChild("Boats")
-					:WaitForChild("Wash")
-
+			task.spawn(function()
+				local remote = game.ReplicatedStorage.RS.Remotes.Boats.Wash
 				while enabled do
 					remote:FireServer()
 					task.wait(2)
@@ -220,24 +213,18 @@ do
 	end)
 end
 
-
+-- AUTO BIRDKILL
+do
 	local enabled = false
-	local thread
-
 	local row = createRow()
 	createLabel(row, "Auto BirdKill")
 
-	local remote = game.ReplicatedStorage
-		:WaitForChild("RS")
-		:WaitForChild("Remotes")
-		:WaitForChild("Misc")
-		:WaitForChild("BirdKill")
+	local remote = game.ReplicatedStorage.RS.Remotes.Misc.BirdKill
 
 	createToggle(row, function(v)
 		enabled = v
-
 		if v then
-			thread = task.spawn(function()
+			task.spawn(function()
 				while enabled do
 					remote:FireServer("Eagle")
 					task.wait(1)
@@ -247,21 +234,21 @@ end
 	end)
 end
 
-local enabled = false
+-- CHEST ESP
+do
+	local enabled = false
 	local esp = {}
 
 	local CHESTS = {
-		["Treasure Chest"] = Color3.fromRGB(255,255,255),
-		["Uncommon Chest"] = Color3.fromRGB(255,255,255),
-		["Rare Chest"] = Color3.fromRGB(255,255,255),
+		["Treasure Chest"] = Color3.new(1,1,1),
+		["Uncommon Chest"] = Color3.new(1,1,1),
+		["Rare Chest"] = Color3.new(1,1,1),
 		["Mystic Chest"] = Color3.fromRGB(255,0,0),
 		["Legendary Chest"] = Color3.fromRGB(0,255,0),
 	}
 
 	local function clear()
-		for _,g in pairs(esp) do
-			if g then g:Destroy() end
-		end
+		for _,g in pairs(esp) do if g then g:Destroy() end end
 		esp = {}
 	end
 
@@ -277,34 +264,30 @@ local enabled = false
 		while true do
 			if enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
 				local pos = plr.Character.HumanoidRootPart.Position
-
 				for _,m in ipairs(workspace:GetDescendants()) do
 					if m:IsA("Model") and CHESTS[m.Name] then
 						local p = m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart")
-						if p then
-							local d = (p.Position - pos).Magnitude
-							if d < 2000 then
-								if not esp[m] then
-									local bb = Instance.new("BillboardGui", m)
-									bb.Size = UDim2.new(0,100,0,18)
-									bb.AlwaysOnTop = true
-									bb.Adornee = p
-									bb.StudsOffset = Vector3.new(0,2.5,0)
+						if p and (p.Position - pos).Magnitude < 2000 then
+							if not esp[m] then
+								local bb = Instance.new("BillboardGui", m)
+								bb.Size = UDim2.new(0,100,0,18)
+								bb.AlwaysOnTop = true
+								bb.Adornee = p
+								bb.StudsOffset = Vector3.new(0,2.5,0)
 
-									local t = Instance.new("TextLabel", bb)
-									t.Size = UDim2.new(1,0,1,0)
-									t.BackgroundTransparency = 1
-									t.Text = m.Name
-									t.Font = FONT
-									t.TextSize = 13
-									t.TextColor3 = CHESTS[m.Name]
+								local t = Instance.new("TextLabel", bb)
+								t.Size = UDim2.new(1,0,1,0)
+								t.BackgroundTransparency = 1
+								t.Text = m.Name
+								t.Font = FONT
+								t.TextSize = 13
+								t.TextColor3 = CHESTS[m.Name]
 
-									esp[m] = bb
-								end
-							elseif esp[m] then
-								esp[m]:Destroy()
-								esp[m] = nil
+								esp[m] = bb
 							end
+						elseif esp[m] then
+							esp[m]:Destroy()
+							esp[m] = nil
 						end
 					end
 				end
