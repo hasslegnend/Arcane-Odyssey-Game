@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -8,32 +7,34 @@ local plr = Players.LocalPlayer
 local ROW_HEIGHT = 30
 local FONT = Enum.Font.GothamBold
 
--- GUI
+-- GUI ROOT
 local Gui = Instance.new("ScreenGui", plr.PlayerGui)
 Gui.Name = "PigeonGui"
 
 local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0, 520, 0, 520) -- square
+Main.Size = UDim2.new(0, 560, 0, 520)
 Main.Position = UDim2.new(0.5,0,0.5,0)
 Main.AnchorPoint = Vector2.new(0.5,0.5)
 Main.BackgroundColor3 = Color3.fromRGB(18,18,18)
 Main.Active = true
 Main.Draggable = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0,10)
 
 -- TOP BAR
 local Top = Instance.new("Frame", Main)
 Top.Size = UDim2.new(1,0,0,40)
 Top.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", Top).CornerRadius = UDim.new(0,10)
 
 local Icon = Instance.new("ImageLabel", Top)
 Icon.Size = UDim2.new(0,24,0,24)
-Icon.Position = UDim2.new(0,8,0.5,-12)
+Icon.Position = UDim2.new(0,10,0.5,-12)
 Icon.BackgroundTransparency = 1
-Icon.Image = "" -- empty on purpose
+Icon.Image = ""
 
 local Title = Instance.new("TextLabel", Top)
-Title.Position = UDim2.new(0,40,0,0)
-Title.Size = UDim2.new(1,-40,1,0)
+Title.Position = UDim2.new(0,44,0,0)
+Title.Size = UDim2.new(1,-44,1,0)
 Title.BackgroundTransparency = 1
 Title.Text = "PigeonHub"
 Title.Font = FONT
@@ -44,10 +45,39 @@ Title.TextColor3 = Color3.new(1,1,1)
 -- SIDEBAR
 local Sidebar = Instance.new("Frame", Main)
 Sidebar.Position = UDim2.new(0,0,0,40)
-Sidebar.Size = UDim2.new(0,120,1,-40)
+Sidebar.Size = UDim2.new(0,130,1,-40)
 Sidebar.BackgroundColor3 = Color3.fromRGB(22,22,22)
+Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0,10)
 
-local function sidebarButton(text, y, callback)
+-- CONTENT
+local Content = Instance.new("Frame", Main)
+Content.Position = UDim2.new(0,130,0,40)
+Content.Size = UDim2.new(1,-130,1,-40)
+Content.BackgroundTransparency = 1
+
+-- SECTION FACTORY
+local function newSection()
+	local s = Instance.new("ScrollingFrame", Content)
+	s.Size = UDim2.new(1,-20,1,-20)
+	s.Position = UDim2.new(0,10,0,10)
+	s.ScrollBarThickness = 6
+	s.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	s.Visible = false
+	s.BackgroundColor3 = Color3.fromRGB(15,15,15)
+	Instance.new("UICorner", s).CornerRadius = UDim.new(0,8)
+
+	local l = Instance.new("UIListLayout", s)
+	l.Padding = UDim.new(0,8)
+	return s
+end
+
+local MainSec = newSection()
+local OpSec   = newSection()
+local MiscSec = newSection()
+MainSec.Visible = true
+
+-- SIDEBAR BUTTONS
+local function sideBtn(text, y, cb)
 	local b = Instance.new("TextButton", Sidebar)
 	b.Size = UDim2.new(1,0,0,36)
 	b.Position = UDim2.new(0,0,0,y)
@@ -56,134 +86,105 @@ local function sidebarButton(text, y, callback)
 	b.TextSize = 14
 	b.TextColor3 = Color3.new(1,1,1)
 	b.BackgroundColor3 = Color3.fromRGB(35,35,35)
-	b.MouseButton1Click:Connect(callback)
-	return b
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+	b.MouseButton1Click:Connect(cb)
 end
 
--- CONTENT HOLDER
-local Content = Instance.new("Frame", Main)
-Content.Position = UDim2.new(0,120,0,40)
-Content.Size = UDim2.new(1,-120,1,-40)
-Content.BackgroundTransparency = 1
-
-local function createSection()
-	local s = Instance.new("ScrollingFrame", Content)
-	s.Size = UDim2.new(1,-20,1,-20)
-	s.Position = UDim2.new(0,10,0,10)
-	s.ScrollBarThickness = 6
-	s.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	s.Visible = false
-	s.BackgroundColor3 = Color3.fromRGB(15,15,15)
-
-	local l = Instance.new("UIListLayout", s)
-	l.Padding = UDim.new(0,8)
-	return s
-end
-
-local MainSection = createSection()
-local OpSection   = createSection()
-local MiscSection = createSection()
-
-MainSection.Visible = true
-
-sidebarButton("Main", 10, function()
-	MainSection.Visible = true
-	OpSection.Visible = false
-	MiscSection.Visible = false
+sideBtn("Main", 10, function()
+	MainSec.Visible, OpSec.Visible, MiscSec.Visible = true,false,false
 end)
-
-sidebarButton("OP", 56, function()
-	MainSection.Visible = false
-	OpSection.Visible = true
-	MiscSection.Visible = false
+sideBtn("OP", 56, function()
+	MainSec.Visible, OpSec.Visible, MiscSec.Visible = false,true,false
 end)
-
-sidebarButton("Misc", 102, function()
-	MainSection.Visible = false
-	OpSection.Visible = false
-	MiscSection.Visible = true
+sideBtn("Misc", 102, function()
+	MainSec.Visible, OpSec.Visible, MiscSec.Visible = false,false,true
 end)
 
 -- HELPERS
-local function createRow(parent)
+local function row(parent)
 	local r = Instance.new("Frame", parent)
 	r.Size = UDim2.new(1,0,0,ROW_HEIGHT)
 	r.BackgroundTransparency = 1
 	return r
 end
 
-local function label(row, text)
-	local l = Instance.new("TextLabel", row)
+local function label(r,t)
+	local l = Instance.new("TextLabel", r)
 	l.Size = UDim2.new(0.5,0,1,0)
 	l.BackgroundTransparency = 1
-	l.Text = text
+	l.Text = t
 	l.Font = FONT
 	l.TextSize = 14
 	l.TextXAlignment = Enum.TextXAlignment.Left
 	l.TextColor3 = Color3.new(1,1,1)
 end
 
-local function input(row, x, placeholder)
-	local t = Instance.new("TextBox", row)
-	t.Size = UDim2.new(0,70,1,0)
-	t.Position = UDim2.new(0,x,0,0)
-	t.PlaceholderText = placeholder
-	t.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	t.TextColor3 = Color3.new(1,1,1)
-	t.Font = Enum.Font.Gotham
-	t.TextSize = 14
-	return t
-end
-
-local function button(row, x, text, color, cb)
-	local b = Instance.new("TextButton", row)
+local function box(r,x,p)
+	local b = Instance.new("TextBox", r)
 	b.Size = UDim2.new(0,70,1,0)
 	b.Position = UDim2.new(0,x,0,0)
-	b.Text = text
+	b.PlaceholderText = p
+	b.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	b.TextColor3 = Color3.new(1,1,1)
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 14
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+	return b
+end
+
+local function btn(r,x,t,c,cb)
+	local b = Instance.new("TextButton", r)
+	b.Size = UDim2.new(0,70,1,0)
+	b.Position = UDim2.new(0,x,0,0)
+	b.Text = t
 	b.Font = FONT
 	b.TextSize = 14
 	b.TextColor3 = Color3.new(1,1,1)
-	b.BackgroundColor3 = color
+	b.BackgroundColor3 = c
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
 	b.MouseButton1Click:Connect(cb)
 end
 
 -- WALK SPEED (MAIN)
 do
-	local row = createRow(MainSection)
-	label(row, "Walk Speed")
-	local box = input(row, 200, "16")
+	local r = row(MainSec)
+	label(r,"Walk Speed")
+	local b = box(r,200,"16")
 
-	button(row, 280, "Apply", Color3.fromRGB(0,140,255), function()
-		local v = tonumber(box.Text)
+	btn(r,280,"Apply",Color3.fromRGB(0,140,255),function()
+		local v = tonumber(b.Text)
 		if v and plr.Character then
 			plr.Character.Humanoid.WalkSpeed = v
 		end
 	end)
 
-	button(row, 360, "Reset", Color3.fromRGB(255,60,60), function()
+	btn(r,360,"Reset",Color3.fromRGB(255,60,60),function()
 		if plr.Character then
 			plr.Character.Humanoid.WalkSpeed = 16
 		end
 	end)
 end
 
--- FLIGHT WITH SAME BOXES (OP)
+-- FLIGHT (OP) — REAL OPTIONS
 do
 	local flying = false
 	local speed = 50
 	local bv
 
-	local row = createRow(OpSection)
-	label(row, "Flight")
-	local box = input(row, 200, "50")
+	local r = row(OpSec)
+	label(r,"Flight")
+	local b = box(r,200,"50")
 
-	button(row, 280, "Apply", Color3.fromRGB(0,140,255), function()
-		speed = tonumber(box.Text) or speed
+	btn(r,280,"Apply",Color3.fromRGB(0,140,255),function()
+		speed = tonumber(b.Text) or speed
+		flying = true
 	end)
 
-	button(row, 360, "Reset", Color3.fromRGB(255,60,60), function()
+	btn(r,360,"Reset",Color3.fromRGB(255,60,60),function()
 		speed = 50
-		box.Text = "50"
+		b.Text = "50"
+		flying = false
+		if bv then bv:Destroy() bv=nil end
 	end)
 
 	RunService.RenderStepped:Connect(function()
@@ -199,16 +200,6 @@ do
 			if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
 			if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
 			bv.Velocity = dir * speed
-		elseif bv then
-			bv:Destroy()
-			bv = nil
-		end
-	end)
-
-	UIS.InputBegan:Connect(function(i,g)
-		if g then return end
-		if i.KeyCode == Enum.KeyCode.F then
-			flying = not flying
 		end
 	end)
 end
