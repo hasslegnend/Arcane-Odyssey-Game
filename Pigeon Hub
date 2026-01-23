@@ -1,703 +1,315 @@
+-- SERVICES
 local Players = game:GetService("Players")
-local plr = Players.LocalPlayer
-while not plr do
-    Players.PlayerAdded:Wait()
-    plr = Players.LocalPlayer
-end
-
-
-local PlayerGui = plr:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local plr = Players.LocalPlayer
+local PlayerGui = plr:WaitForChild("PlayerGui")
 
-local padding = 5
-local buttonWidth = 200
-local buttonHeight = 30
+-- CONSTANTS
+local ROW_HEIGHT = 30
+local FONT = Enum.Font.GothamBold
 
-local PigeonGui = Instance.new("ScreenGui")
-PigeonGui.Parent = PlayerGui
-PigeonGui.Name = "PigeonGui"
+-- GUI
+local Gui = Instance.new("ScreenGui", PlayerGui)
+Gui.Name = "PigeonGui"
 
-local PigeonFrame = Instance.new("Frame")
-PigeonFrame.Parent = PigeonGui
-PigeonFrame.Visible = true
-PigeonFrame.Active = true
-PigeonFrame.Position = UDim2.new(0.5,0,0.5,0)
-PigeonFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-PigeonFrame.Size = UDim2.new(0, 475, 0, 650)
-PigeonFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-PigeonFrame.BorderColor3 = Color3.fromRGB(0, 0, 139)
-PigeonFrame.Selectable = true
-PigeonFrame.Draggable = true
+local Main = Instance.new("Frame", Gui)
+Main.Size = UDim2.new(0, 480, 0, 650)
+Main.Position = UDim2.new(0.5,0,0.5,0)
+Main.AnchorPoint = Vector2.new(0.5,0.5)
+Main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Main.Draggable = true
+Main.Active = true
 
-local function createTab(text, position)
-	local tab = Instance.new("TextButton")
-	tab.Parent = PigeonFrame
-	tab.Size = UDim2.new(0, 140, 0, 35)
-	tab.Position = position
-	tab.Text = text
-	tab.Font = Enum.Font.GothamBold
-	tab.TextSize = 14
-	tab.TextColor3 = Color3.fromRGB(255,255,255)
-	tab.BackgroundColor3 = Color3.fromRGB(30,30,30)
-	tab.BorderSizePixel = 0
-	tab.AutoButtonColor = false
+-- SECTION
+local Section = Instance.new("ScrollingFrame", Main)
+Section.Position = UDim2.new(0,10,0,50)
+Section.Size = UDim2.new(1,-20,1,-60)
+Section.CanvasSize = UDim2.new(0,0,0,0)
+Section.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Section.ScrollBarThickness = 6
+Section.BackgroundColor3 = Color3.fromRGB(15,15,15)
 
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 8)
-	corner.Parent = tab
+local Layout = Instance.new("UIListLayout", Section)
+Layout.Padding = UDim.new(0,8)
 
-	return tab
-end
-
-local function createSection()
-	local sec = Instance.new("ScrollingFrame")
-	sec.Parent = PigeonFrame
-	sec.Position = UDim2.new(0, 10, 0, 55)
-	sec.Size = UDim2.new(1, -20, 1, -65)
-
-	sec.CanvasSize = UDim2.new(0, 0, 0, 0)
-	sec.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	sec.ScrollBarThickness = 6
-	sec.ScrollBarImageColor3 = Color3.fromRGB(90, 90, 90)
-	sec.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-	sec.BorderSizePixel = 0
-	sec.Visible = false
-
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 12)
-	corner.Parent = sec
-
-	local pad = Instance.new("UIPadding")
-	pad.PaddingTop = UDim.new(0, 10)
-	pad.PaddingLeft = UDim.new(0, 10)
-	pad.PaddingRight = UDim.new(0, 10)
-	pad.PaddingBottom = UDim.new(0, 10)
-	pad.Parent = sec
-
-	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 8)
-	layout.Parent = sec
-
-	return sec
-end
-
-local function createRow(parent, labelText)
-	local row = Instance.new("Frame")
-	row.Size = UDim2.new(1, 0, 0, buttonHeight)
+-- HELPERS
+local function createRow()
+	local row = Instance.new("Frame", Section)
+	row.Size = UDim2.new(1,0,0,ROW_HEIGHT)
 	row.BackgroundTransparency = 1
-	row.Parent = parent
-
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(0, 130, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = labelText
-	label.TextColor3 = Color3.fromRGB(255,255,255)
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = row
-
 	return row
 end
 
-local function createCheckbox(row, x)
-	local box = Instance.new("TextButton")
-	box.Size = UDim2.new(0, 30, 1, 0)
-	box.Position = UDim2.new(0, x, 0, 0)
-	box.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	box.Text = ""
-	box.AutoButtonColor = false
-	box.Parent = row
-	return box
+local function createLabel(row, text)
+	local l = Instance.new("TextLabel", row)
+	l.Size = UDim2.new(0.55,0,1,0)
+	l.BackgroundTransparency = 1
+	l.Text = text
+	l.Font = FONT
+	l.TextSize = 14
+	l.TextXAlignment = Left
+	l.TextColor3 = Color3.new(1,1,1)
+end
+
+local function createToggle(row, callback)
+	local bg = Instance.new("Frame", row)
+	bg.Size = UDim2.new(0,44,0,22)
+	bg.Position = UDim2.new(1,-50,0.5,-11)
+	bg.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	Instance.new("UICorner", bg).CornerRadius = UDim.new(1,0)
+
+	local knob = Instance.new("Frame", bg)
+	knob.Size = UDim2.new(0,18,0,18)
+	knob.Position = UDim2.new(0,2,0.5,-9)
+	knob.BackgroundColor3 = Color3.new(1,1,1)
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+
+	local state = false
+	bg.InputBegan:Connect(function()
+		state = not state
+		bg.BackgroundColor3 = state and Color3.fromRGB(140,0,255) or Color3.fromRGB(60,60,60)
+		knob.Position = state and UDim2.new(1,-20,0.5,-9) or UDim2.new(0,2,0.5,-9)
+		callback(state)
+	end)
 end
 
 local function createInput(row, x, placeholder)
-	local input = Instance.new("TextBox")
-	input.Size = UDim2.new(0, 80, 1, 0)
-	input.Position = UDim2.new(0, x, 0, 0)
-	input.PlaceholderText = placeholder
-	input.Text = ""
-	input.TextColor3 = Color3.fromRGB(255,255,255)
-	input.Font = Enum.Font.Gotham
-	input.TextSize = 14
-	input.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	input.ClearTextOnFocus = false
-	input.Parent = row
-	return input
+	local t = Instance.new("TextBox", row)
+	t.Size = UDim2.new(0,70,1,0)
+	t.Position = UDim2.new(0,x,0,0)
+	t.PlaceholderText = placeholder
+	t.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	t.TextColor3 = Color3.new(1,1,1)
+	t.Font = Enum.Font.Gotham
+	t.TextSize = 14
+	return t
 end
 
-local function createButton(row, x, text, color)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0, 80, 1, 0)
-	btn.Position = UDim2.new(0, x, 0, 0)
-	btn.Text = text
-	btn.BackgroundColor3 = color
-	btn.TextColor3 = Color3.fromRGB(255,255,255)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
-	btn.Parent = row
-	return btn
+local function createButton(row, x, text, color, cb)
+	local b = Instance.new("TextButton", row)
+	b.Size = UDim2.new(0,70,1,0)
+	b.Position = UDim2.new(0,x,0,0)
+	b.Text = text
+	b.Font = FONT
+	b.TextSize = 14
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = color
+	b.MouseButton1Click:Connect(cb)
 end
-
-
-
-local function createLabelWithCheckbox(parent, text)
-	local container = Instance.new("Frame")
-	container.Size = UDim2.new(1, 0, 0, buttonHeight)
-	container.BackgroundTransparency = 1
-	container.Parent = parent
-
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(0, 120, 1, 0)
-	label.Position = UDim2.new(0, 0, 0, 0)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.TextColor3 = Color3.fromRGB(255,255,255)
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = container
-
-	local checkbox = Instance.new("TextButton")
-	checkbox.Size = UDim2.new(0, 30, 0, buttonHeight)
-	checkbox.Position = UDim2.new(0, 130, 0, 0)
-	checkbox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	checkbox.Text = ""
-	checkbox.AutoButtonColor = false
-	checkbox.Parent = container
-
-	return checkbox
-end
-
-local function createRemoveRow(parent, text, onClick)
-	local row = Instance.new("Frame")
-	row.Size = UDim2.new(1, 0, 0, buttonHeight)
-	row.BackgroundTransparency = 1
-	row.Parent = parent
-
-	-- Label (left)
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(0.7, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.TextColor3 = Color3.new(1,1,1)
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 14
-	label.Parent = row
-
-	-- Remove button (right)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0, 90, 0, 24)
-	btn.Position = UDim2.new(1, -95, 0.5, -12)
-	btn.Text = "Remove"
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 13
-	btn.TextColor3 = Color3.new(1,1,1)
-	btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-	btn.Parent = row
-
-	btn.MouseButton1Click:Connect(onClick)
-end
-
-
-
-
-local GeneralStuff = createTab("GENERAL", UDim2.new(0, padding, 0, padding))
-local GoodStuff    = createTab("GOOD STUFF", UDim2.new(1/3, padding, 0, padding))
-local MiscStuff    = createTab("MISC", UDim2.new(2/3, padding, 0, padding))
-
-
-local GeneralSection = createSection()
-GeneralSection.Visible = true
-local GoodSection    = createSection()
-local MiscSection    = createSection()
-
--- Generic Button Creator
-local function addButton(section, name, color)
-	local button = Instance.new("TextButton")
-	button.Parent = section
-	button.Size = UDim2.new(0, buttonWidth, 0, buttonHeight)
-	button.BackgroundColor3 = color or Color3.fromRGB(0,140,255)
-	button.TextColor3 = Color3.new(1,1,1)
-	button.Font = Enum.Font.GothamBold
-	button.TextSize = 14
-	button.Text = name
-
-	local index = 0
-	for _, c in pairs(section:GetChildren()) do
-		if c:IsA("TextButton") then
-			index = index + 1
-		end
-	end
-
-	local col = (index-1) % 2
-	local row = math.floor((index-1) / 2)
-	button.Position = UDim2.new(0, padding + col*(buttonWidth + padding), 0, padding + row*(buttonHeight + padding))
-
-	return button
-end
-
-addButton(GoodSection, "Example Option")
-addButton(MiscSection, "Unload GUI", Color3.fromRGB(200,60,60)).MouseButton1Click:Connect(function()
-	PigeonGui:Destroy()
-end)
-
--- TAB SWITCHING
-local function selectTab(tab)
-	GeneralStuff.TextColor3 = Color3.fromRGB(255,255,255)
-	GoodStuff.TextColor3    = Color3.fromRGB(255,255,255)
-	MiscStuff.TextColor3    = Color3.fromRGB(255,255,255)
-
-	GeneralSection.Visible = false
-	GoodSection.Visible = false
-	MiscSection.Visible = false
-
-	if tab == GeneralStuff then
-		GeneralSection.Visible = true
-	elseif tab == GoodStuff then
-		GoodSection.Visible = true
-	elseif tab == MiscStuff then
-		MiscSection.Visible = true
-	end
-
-	tab.TextColor3 = Color3.fromRGB(0,255,255)
-end
-
-local function createToggleRow(parent, text)
-	local row = Instance.new("Frame")
-	row.Size = UDim2.new(1, 0, 0, buttonHeight)
-	row.BackgroundTransparency = 1
-	row.Parent = parent
-
-	-- Label
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(0.55, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.TextXAlignment = Left
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 14
-	label.TextColor3 = Color3.new(1,1,1)
-	label.Parent = row
-
-	-- Keybind display
-	local keybind = Instance.new("TextButton")
-	keybind.Size = UDim2.new(0, 50, 0, 22)
-	keybind.Position = UDim2.new(0.6, 0, 0.5, -11)
-	keybind.Text = "None"
-	keybind.Font = Enum.Font.Gotham
-	keybind.TextSize = 12
-	keybind.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	keybind.TextColor3 = Color3.new(1,1,1)
-	keybind.Parent = row
-
-	-- Toggle background
-	local toggle = Instance.new("Frame")
-	toggle.Size = UDim2.new(0, 42, 0, 22)
-	toggle.Position = UDim2.new(1, -50, 0.5, -11)
-	toggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	toggle.Parent = row
-
-	Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
-
-	-- Knob
-	local knob = Instance.new("Frame")
-	knob.Size = UDim2.new(0, 18, 0, 18)
-	knob.Position = UDim2.new(0, 2, 0.5, -9)
-	knob.BackgroundColor3 = Color3.new(1,1,1)
-	knob.Parent = toggle
-	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
-
-	return {
-		Row = row,
-		Toggle = toggle,
-		Knob = knob,
-		Keybind = keybind
-	}
-end
-
-local function createRemoveRow(parent, text, callback)
-	local row = Instance.new("Frame", parent)
-	row.Size = UDim2.new(1,0,0,buttonHeight)
-	row.BackgroundTransparency = 1
-
-	local label = Instance.new("TextLabel", row)
-	label.Size = UDim2.new(0.6,0,1,0)
-	label.Text = text
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.new(1,1,1)
-	label.Font = Enum.Font.GothamBold
-
-	local btn = Instance.new("TextButton", row)
-	btn.Size = UDim2.new(0,80,0,24)
-	btn.Position = UDim2.new(1,-85,0.5,-12)
-	btn.Text = "Remove"
-	btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
-
-	btn.MouseButton1Click:Connect(callback)
-end
-
-GeneralStuff.MouseButton1Click:Connect(function() selectTab(GeneralStuff) end)
-GoodStuff.MouseButton1Click:Connect(function() selectTab(GoodStuff) end)
-MiscStuff.MouseButton1Click:Connect(function() selectTab(MiscStuff) end)
-
--- GUI Toggle with END key
-local guiOn = true
-UIS.InputBegan:Connect(function(input,gp)
-	if gp then return end
-	if input.KeyCode == Enum.KeyCode.End then
-		guiOn = not guiOn
-		PigeonGui.Enabled = guiOn
-	end
-end)
-
--- GENERAL CONTROLS
-local sectionY = {
-	General = 10,
-	Good = 10,
-	Misc = 10
-}
 
 -- WALK SPEED
-local wsRow = createRow(GeneralSection, "Walk Speed:")
-local WalkSpeedInput = createInput(wsRow, 140, "16")
-local ApplySpeedBtn = createButton(wsRow, 230, "Apply", Color3.fromRGB(0,140,255))
-local DisableSpeedBtn = createButton(wsRow, 320, "Disable", Color3.fromRGB(255,0,0))
-
-ApplySpeedBtn.MouseButton1Click:Connect(function()
-	local speed = tonumber(WalkSpeedInput.Text)
-	if speed and plr.Character and plr.Character:FindFirstChild("Humanoid") then
-		plr.Character.Humanoid.WalkSpeed = speed
-	end
-end)
-
-DisableSpeedBtn.MouseButton1Click:Connect(function()
-	if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-		plr.Character.Humanoid.WalkSpeed = 16
-	end
-	WalkSpeedInput.Text = ""
-end)
+do
+	local row = createRow()
+	createLabel(row, "Walk Speed")
+	local input = createInput(row, 200, "16")
+	createButton(row, 280, "Apply", Color3.fromRGB(0,140,255), function()
+		local v = tonumber(input.Text)
+		if v and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+			plr.Character.Humanoid.WalkSpeed = v
+		end
+	end)
+	createButton(row, 360, "Reset", Color3.fromRGB(255,60,60), function()
+		if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+			plr.Character.Humanoid.WalkSpeed = 16
+		end
+	end)
+end
 
 -- FLIGHT
-local flightRow = createRow(GeneralSection, "Flight Speed:")
-local FlightInput = createInput(flightRow, 140, "50")
-local ApplyFlightBtn = createButton(flightRow, 230, "Apply", Color3.fromRGB(0,140,255))
-local DisableFlightBtn = createButton(flightRow, 320, "Disable", Color3.fromRGB(255,0,0))
+do
+	local flying, bv = false, nil
+	local row = createRow()
+	createLabel(row, "Flight")
+	createToggle(row, function(v)
+		flying = v
+		if not v and bv then bv:Destroy() end
+	end)
 
-local flying = false
-local flightSpeed = 50
-local bodyVelocity
-local cam = workspace.CurrentCamera
-
-ApplyFlightBtn.MouseButton1Click:Connect(function()
-	local speed = tonumber(FlightInput.Text)
-	if speed then
-		flightSpeed = speed
-		local char = plr.Character
-		if char and char:FindFirstChild("HumanoidRootPart") then
-			if not flying then
-				flying = true
-				bodyVelocity = Instance.new("BodyVelocity")
-				bodyVelocity.MaxForce = Vector3.new(400000,400000,400000)
-				bodyVelocity.Velocity = Vector3.new(0,0,0)
-				bodyVelocity.Parent = char.HumanoidRootPart
+	RunService.RenderStepped:Connect(function()
+		if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+			if not bv then
+				bv = Instance.new("BodyVelocity", plr.Character.HumanoidRootPart)
+				bv.MaxForce = Vector3.new(1e6,1e6,1e6)
 			end
+			local cam = workspace.CurrentCamera
+			local dir = Vector3.zero
+			if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
+			if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
+			if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
+			if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
+			bv.Velocity = dir * 50
 		end
-	end
-end)
-
-DisableFlightBtn.MouseButton1Click:Connect(function()
-	if flying and bodyVelocity then
-		bodyVelocity:Destroy()
-	end
-	flying = false
-	FlightInput.Text = ""
-end)
-
-RunService.RenderStepped:Connect(function()
-	if flying and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-		local hrp = plr.Character.HumanoidRootPart
-		local direction = Vector3.new()
-		if UIS:IsKeyDown(Enum.KeyCode.W) then direction = direction + cam.CFrame.LookVector end
-		if UIS:IsKeyDown(Enum.KeyCode.S) then direction = direction - cam.CFrame.LookVector end
-		if UIS:IsKeyDown(Enum.KeyCode.A) then direction = direction - cam.CFrame.RightVector end
-		if UIS:IsKeyDown(Enum.KeyCode.D) then direction = direction + cam.CFrame.RightVector end
-		if UIS:IsKeyDown(Enum.KeyCode.Space) then direction = direction + Vector3.new(0,1,0) end
-		if direction.Magnitude > 0 then
-			bodyVelocity.Velocity = direction.Unit * flightSpeed
-		else
-			bodyVelocity.Velocity = Vector3.new(0,0,0)
-		end
-	end
-end)
-
--- TELEPORT TO MOUSE
-local tpRow = createRow(GeneralSection, "Teleport to Mouse:")
-local TpCheckbox = createCheckbox(tpRow, 140)
-
-
-local TpEnabled = false
-TpCheckbox.MouseButton1Click:Connect(function()
-	TpEnabled = not TpEnabled
-	if TpEnabled then
-		TpCheckbox.BackgroundColor3 = Color3.fromRGB(0,140,255)
-	else
-		TpCheckbox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	end
-end)
-
-RunService.RenderStepped:Connect(function()
-	if TpEnabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-		if UIS:IsKeyDown(Enum.KeyCode.LeftControl) and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-			local hrp = plr.Character.HumanoidRootPart
-			local mousePos = UIS:GetMouseLocation()
-			local ray = workspace.CurrentCamera:ScreenPointToRay(mousePos.X, mousePos.Y)
-			local targetPos = ray.Origin + ray.Direction * 100
-			hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,3,0))
-		end
-	end
-end)
+	end)
+end
 
 -- INFINITE JUMP
-local ijRow = createRow(GeneralSection, "Infinite Jump:")
-local InfiniteJumpBox = createCheckbox(ijRow, 140)
+do
+	local enabled = false
+	local row = createRow()
+	createLabel(row, "Infinite Jump")
+	createToggle(row, function(v) enabled = v end)
 
-
-local infiniteJumpEnabled = false
-InfiniteJumpBox.MouseButton1Click:Connect(function()
-	infiniteJumpEnabled = not infiniteJumpEnabled
-	if infiniteJumpEnabled then
-		InfiniteJumpBox.BackgroundColor3 = Color3.fromRGB(0,140,255)
-	else
-		InfiniteJumpBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	end
-end)
-
-UIS.JumpRequest:Connect(function()
-	if infiniteJumpEnabled then
-		local char = plr.Character
-		if char and char:FindFirstChild("Humanoid") then
-			char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+	UIS.JumpRequest:Connect(function()
+		if enabled and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+			plr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 		end
-	end
-end)
+	end)
+end
 
 -- NOCLIP
-local ncRow = createRow(GeneralSection, "Noclip:")
-local NoclipBox = createCheckbox(ncRow, 140)
+do
+	local enabled = false
+	local row = createRow()
+	createLabel(row, "Noclip")
+	createToggle(row, function(v) enabled = v end)
 
-local noclipEnabled = false
-NoclipBox.MouseButton1Click:Connect(function()
-	noclipEnabled = not noclipEnabled
-	if noclipEnabled then
-		NoclipBox.BackgroundColor3 = Color3.fromRGB(0,140,255)
-	else
-		NoclipBox.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	end
-end)
-
-RunService.Stepped:Connect(function()
-	if noclipEnabled and plr.Character then
-		for _, part in pairs(plr.Character:GetChildren()) do
-			if part:IsA("BasePart") and part.CanCollide then
-				part.CanCollide = false
+	RunService.Stepped:Connect(function()
+		if enabled and plr.Character then
+			for _,p in pairs(plr.Character:GetChildren()) do
+				if p:IsA("BasePart") then p.CanCollide = false end
 			end
 		end
-	end
-end)
+	end)
+end
 
 -- REMOVE INSANITY
-
-createRemoveRow(GeneralSection, "Remove Insanity", function()
-	local temp = plr.PlayerGui:FindFirstChild("Temp")
-	if temp and temp:FindFirstChild("Insanity") then
-		temp.Insanity:Destroy()
-	end
-end)
-
-
+do
+	local row = createRow()
+	createLabel(row, "Remove Insanity")
+	createButton(row, 350, "Remove", Color3.fromRGB(90,90,90), function()
+		local t = plr.PlayerGui:FindFirstChild("Temp")
+		if t and t:FindFirstChild("Insanity") then t.Insanity:Destroy() end
+	end)
+end
 
 -- REMOVE FOG
+do
+	local row = createRow()
+	createLabel(row, "Remove Fog")
+	createButton(row, 350, "Remove", Color3.fromRGB(90,90,90), function()
+		local t = plr.PlayerGui:FindFirstChild("Temp")
+		if t and t:FindFirstChild("FogParticles") then t.FogParticles:Destroy() end
+	end)
+end
 
+do
+	local enabled = false
+	local thread
 
-createRemoveRow(GeneralSection, "Remove Fog", function()
-	local temp = plr.PlayerGui:FindFirstChild("Temp")
-	if temp and temp:FindFirstChild("FogParticles") then
-		temp.FogParticles:Destroy()
-	end
-end)
+	local row = createRow()
+	createLabel(row, "Auto Wash")
 
--- AUTO WASH
-local washRow = createRow(GeneralSection, "Auto Wash:")
-local WashToggle = createCheckbox(washRow, 140)
+	createToggle(row, function(v)
+		enabled = v
 
-
-local washEnabled = false
-local washThread = nil
-
-WashToggle.MouseButton1Click:Connect(function()
-	washEnabled = not washEnabled
-
-	if washEnabled then
-		WashToggle.BackgroundColor3 = Color3.fromRGB(0,140,255)
-
-		washThread = task.spawn(function()
-			while washEnabled do
-				local washRemote =
-					game.ReplicatedStorage
+		if v then
+			thread = task.spawn(function()
+				local remote = game.ReplicatedStorage
 					:WaitForChild("RS")
 					:WaitForChild("Remotes")
 					:WaitForChild("Boats")
 					:WaitForChild("Wash")
 
-				washRemote:FireServer()
-				task.wait(2)
-			end
-		end)
-	else
-		WashToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	end
-end)
-
--- BirdKill Label
-local birdRow = createRow(GeneralSection, "Auto BirdKill:")
-local BirdKillToggle = createCheckbox(birdRow, 140)
-
--- Logic
-local birdKillEnabled = false
-local birdKillThread
-
-local BirdKillRemote = game.ReplicatedStorage
-	:WaitForChild("RS")
-	:WaitForChild("Remotes")
-	:WaitForChild("Misc")
-	:WaitForChild("BirdKill")
-
-BirdKillToggle.MouseButton1Click:Connect(function()
-	birdKillEnabled = not birdKillEnabled
-
-	if birdKillEnabled then
-		BirdKillToggle.BackgroundColor3 = Color3.fromRGB(0,150,255)
-
-		birdKillThread = task.spawn(function()
-			while birdKillEnabled do
-				BirdKillRemote:FireServer("Eagle")
-				task.wait(1)
-			end
-		end)
-	else
-		BirdKillToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	end
-end)
-
-
--- ==========================
--- CHEST ESP (OPTIMIZED + DESTROY @ 20 STUDS)
--- ==========================
-
-local ChestToggle = addButton(MiscSection, "Chest ESP")
-ChestToggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
-
-local player = game.Players.LocalPlayer
-
-local CHEST_NAMES = {
-	["Treasure Chest"] = Color3.fromRGB(255,255,255),
-	["Uncommon Chest"] = Color3.fromRGB(255,255,255),
-	["Rare Chest"] = Color3.fromRGB(255,255,255),
-	["Mystic Chest"] = Color3.fromRGB(255,0,0),
-	["Legendary Chest"] = Color3.fromRGB(0,255,0),
-}
-
-local MAX_DISTANCE = 2000
-local CLOSE_DISTANCE = 20
-
-local espEnabled = false
-local espObjects = {}
-local removedChests = {}
-
--- Create ESP ONCE
-local function createESP(model)
-	if espObjects[model] or removedChests[model] then return end
-
-	local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-	if not primary then return end
-
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "ChestESP"
-	billboard.Adornee = primary
-	billboard.Size = UDim2.new(0, 90, 0, 18)
-	billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-	billboard.AlwaysOnTop = true
-
-	local text = Instance.new("TextLabel")
-	text.Parent = billboard
-	text.Size = UDim2.new(1,0,1,0)
-	text.BackgroundTransparency = 1
-	text.Text = model.Name
-	text.Font = Enum.Font.GothamBold
-	text.TextSize = 13
-	text.TextScaled = false
-	text.TextStrokeTransparency = 0.3
-	text.TextColor3 = CHEST_NAMES[model.Name] or Color3.new(1,1,1)
-
-	billboard.Parent = model
-	espObjects[model] = billboard
+				while enabled do
+					remote:FireServer()
+					task.wait(2)
+				end
+			end)
+		end
+	end)
 end
 
--- Main update loop (1s scan)
-task.spawn(function()
-	while true do
-		if espEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			local hrpPos = player.Character.HumanoidRootPart.Position
 
-			for _, model in ipairs(workspace:GetDescendants()) do
-				if model:IsA("Model") and CHEST_NAMES[model.Name] and not removedChests[model] then
-					local primary = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-					if primary then
-						local dist = (primary.Position - hrpPos).Magnitude
+	local enabled = false
+	local thread
 
-						if dist <= CLOSE_DISTANCE then
-							if espObjects[model] then
-								espObjects[model]:Destroy()
-								espObjects[model] = nil
+	local row = createRow()
+	createLabel(row, "Auto BirdKill")
+
+	local remote = game.ReplicatedStorage
+		:WaitForChild("RS")
+		:WaitForChild("Remotes")
+		:WaitForChild("Misc")
+		:WaitForChild("BirdKill")
+
+	createToggle(row, function(v)
+		enabled = v
+
+		if v then
+			thread = task.spawn(function()
+				while enabled do
+					remote:FireServer("Eagle")
+					task.wait(1)
+				end
+			end)
+		end
+	end)
+end
+
+local enabled = false
+	local esp = {}
+
+	local CHESTS = {
+		["Treasure Chest"] = Color3.fromRGB(255,255,255),
+		["Uncommon Chest"] = Color3.fromRGB(255,255,255),
+		["Rare Chest"] = Color3.fromRGB(255,255,255),
+		["Mystic Chest"] = Color3.fromRGB(255,0,0),
+		["Legendary Chest"] = Color3.fromRGB(0,255,0),
+	}
+
+	local function clear()
+		for _,g in pairs(esp) do
+			if g then g:Destroy() end
+		end
+		esp = {}
+	end
+
+	local row = createRow()
+	createLabel(row, "Chest ESP")
+
+	createToggle(row, function(v)
+		enabled = v
+		if not v then clear() end
+	end)
+
+	task.spawn(function()
+		while true do
+			if enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				local pos = plr.Character.HumanoidRootPart.Position
+
+				for _,m in ipairs(workspace:GetDescendants()) do
+					if m:IsA("Model") and CHESTS[m.Name] then
+						local p = m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart")
+						if p then
+							local d = (p.Position - pos).Magnitude
+							if d < 2000 then
+								if not esp[m] then
+									local bb = Instance.new("BillboardGui", m)
+									bb.Size = UDim2.new(0,100,0,18)
+									bb.AlwaysOnTop = true
+									bb.Adornee = p
+									bb.StudsOffset = Vector3.new(0,2.5,0)
+
+									local t = Instance.new("TextLabel", bb)
+									t.Size = UDim2.new(1,0,1,0)
+									t.BackgroundTransparency = 1
+									t.Text = m.Name
+									t.Font = FONT
+									t.TextSize = 13
+									t.TextColor3 = CHESTS[m.Name]
+
+									esp[m] = bb
+								end
+							elseif esp[m] then
+								esp[m]:Destroy()
+								esp[m] = nil
 							end
-							removedChests[model] = true
-
-						elseif dist <= MAX_DISTANCE then
-							createESP(model)
-
-						elseif espObjects[model] then
-							espObjects[model]:Destroy()
-							espObjects[model] = nil
 						end
 					end
 				end
 			end
+			task.wait(1)
 		end
-		task.wait(1)
-	end
-end)
-
--- Toggle button
-ChestToggle.MouseButton1Click:Connect(function()
-	espEnabled = not espEnabled
-	ChestToggle.BackgroundColor3 = espEnabled and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
-
-	if not espEnabled then
-		for _, gui in pairs(espObjects) do
-			if gui then gui:Destroy() end
-		end
-		espObjects = {}
-	end
-end)
-
-local function updateCanvas(section)
-	section.CanvasSize = UDim2.new(0, 0, 0, currentY + 20)
+	end)
 end
-
-
-updateCanvas(GeneralSection)
-updateCanvas(GoodSection)
-updateCanvas(MiscSection)
