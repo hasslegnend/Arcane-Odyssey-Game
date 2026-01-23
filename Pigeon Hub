@@ -7,25 +7,35 @@ local plr = Players.LocalPlayer
 -- GUI ROOT
 local Gui = Instance.new("ScreenGui", plr.PlayerGui)
 Gui.Name = "PigeonHub"
+Gui.ResetOnSpawn = false
 
+-- MAIN FRAME
 local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0, 600, 0, 520)
+Main.Size = UDim2.new(0, 650, 0, 560)
 Main.Position = UDim2.new(0.5,0,0.5,0)
 Main.AnchorPoint = Vector2.new(0.5,0.5)
-Main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Main.BackgroundColor3 = Color3.fromRGB(8,8,8)
 Main.Active = true
 Main.Draggable = true
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0,12)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0,14)
+
+-- END TOGGLE
+UIS.InputBegan:Connect(function(i,gp)
+	if gp then return end
+	if i.KeyCode == Enum.KeyCode.End then
+		Gui.Enabled = not Gui.Enabled
+	end
+end)
 
 -- TOP BAR
 local Top = Instance.new("Frame", Main)
-Top.Size = UDim2.new(1,0,0,40)
-Top.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", Top).CornerRadius = UDim.new(0,12)
+Top.Size = UDim2.new(1,0,0,44)
+Top.BackgroundColor3 = Color3.fromRGB(12,12,12)
+Instance.new("UICorner", Top).CornerRadius = UDim.new(0,14)
 
 local Title = Instance.new("TextLabel", Top)
-Title.Position = UDim2.new(0,50,0,0)
-Title.Size = UDim2.new(1,-50,1,0)
+Title.Position = UDim2.new(0,48,0,0)
+Title.Size = UDim2.new(1,-48,1,0)
 Title.BackgroundTransparency = 1
 Title.Text = "PigeonHub"
 Title.Font = Enum.Font.GothamBold
@@ -33,109 +43,116 @@ Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.TextColor3 = Color3.new(1,1,1)
 
--- ICON PLACEHOLDER
-local Icon = Instance.new("Frame", Top)
-Icon.Position = UDim2.new(0,12,0.5,-10)
-Icon.Size = UDim2.new(0,20,0,20)
-Icon.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Instance.new("UICorner", Icon).CornerRadius = UDim.new(0,4)
+-- SEARCH
+local Search = Instance.new("TextBox", Top)
+Search.Size = UDim2.new(0,180,0,24)
+Search.Position = UDim2.new(1,-200,0.5,-12)
+Search.PlaceholderText = "Search..."
+Search.BackgroundColor3 = Color3.fromRGB(16,16,16)
+Search.TextColor3 = Color3.new(1,1,1)
+Search.Font = Enum.Font.Gotham
+Search.TextSize = 13
+Instance.new("UICorner", Search).CornerRadius = UDim.new(0,6)
 
 -- SIDEBAR
 local Sidebar = Instance.new("Frame", Main)
-Sidebar.Position = UDim2.new(0,0,0,40)
-Sidebar.Size = UDim2.new(0,140,1,-40)
-Sidebar.BackgroundColor3 = Color3.fromRGB(23,23,23)
-Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0,12)
+Sidebar.Position = UDim2.new(0,0,0,44)
+Sidebar.Size = UDim2.new(0,150,1,-44)
+Sidebar.BackgroundColor3 = Color3.fromRGB(10,10,10)
 
 -- CONTENT
 local Content = Instance.new("Frame", Main)
-Content.Position = UDim2.new(0,140,0,40)
-Content.Size = UDim2.new(1,-140,1,-40)
+Content.Position = UDim2.new(0,150,0,44)
+Content.Size = UDim2.new(1,-150,1,-44)
 Content.BackgroundTransparency = 1
 
--- SECTION FACTORY
+-- SECTIONS
 local function newSection()
 	local s = Instance.new("ScrollingFrame", Content)
-	s.Size = UDim2.new(1,-20,1,-20)
-	s.Position = UDim2.new(0,10,0,10)
-	s.ScrollBarThickness = 6
+	s.Size = UDim2.new(1,-16,1,-16)
+	s.Position = UDim2.new(0,8,0,8)
 	s.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	s.BackgroundColor3 = Color3.fromRGB(16,16,16)
+	s.ScrollBarThickness = 6
+	s.BackgroundColor3 = Color3.fromRGB(10,10,10)
 	s.Visible = false
-	Instance.new("UICorner", s).CornerRadius = UDim.new(0,8)
+	Instance.new("UICorner", s).CornerRadius = UDim.new(0,10)
 	Instance.new("UIListLayout", s).Padding = UDim.new(0,8)
 	return s
 end
 
-local MainSec = newSection()
-local OpSec   = newSection()
-local MiscSec = newSection()
-MainSec.Visible = true
+local SecMain = newSection()
+local SecOP   = newSection()
+local SecMisc = newSection()
+SecMain.Visible = true
 
 -- SIDEBAR BUTTONS
-local function sideBtn(text, y, cb)
+local activeBtn
+local function sideBtn(txt, y, sec)
 	local b = Instance.new("TextButton", Sidebar)
-	b.Size = UDim2.new(1,-10,0,36)
-	b.Position = UDim2.new(0,5,0,y)
-	b.Text = text
+	b.Size = UDim2.new(1,-20,0,36)
+	b.Position = UDim2.new(0,10,0,y)
+	b.Text = txt
 	b.Font = Enum.Font.GothamBold
 	b.TextSize = 14
 	b.TextColor3 = Color3.new(1,1,1)
-	b.BackgroundColor3 = Color3.fromRGB(35,35,35)
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
-	b.MouseButton1Click:Connect(cb)
+	b.BackgroundTransparency = 1
+
+	b.MouseButton1Click:Connect(function()
+		SecMain.Visible, SecOP.Visible, SecMisc.Visible = false,false,false
+		sec.Visible = true
+		if activeBtn then activeBtn.BackgroundTransparency = 1 end
+		b.BackgroundTransparency = 0
+		b.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		activeBtn = b
+	end)
 end
 
-sideBtn("Main", 10, function()
-	MainSec.Visible, OpSec.Visible, MiscSec.Visible = true,false,false
-end)
-sideBtn("OP", 56, function()
-	MainSec.Visible, OpSec.Visible, MiscSec.Visible = false,true,false
-end)
-sideBtn("Misc", 102, function()
-	MainSec.Visible, OpSec.Visible, MiscSec.Visible = false,false,true
-end)
+sideBtn("Main", 12, SecMain)
+sideBtn("OP", 56, SecOP)
+sideBtn("Misc", 100, SecMisc)
 
--- === TOGGLE + KEYBIND SYSTEM ===
+-- KEYBINDS
 local keybinds = {}
-
 UIS.InputBegan:Connect(function(i,gp)
-	if gp or not i.KeyCode then return end
+	if gp then return end
 	for _,v in pairs(keybinds) do
-		if v.Key == i.KeyCode then
-			v.Toggle()
-		end
+		if v.Key == i.KeyCode then v.Toggle() end
 	end
 end)
 
-local function toggleRow(parent, text, callback)
+-- TOGGLE ROW (tight spacing)
+local function toggleRow(parent, name, allowKeybind, callback)
 	local row = Instance.new("Frame", parent)
 	row.Size = UDim2.new(1,0,0,30)
 	row.BackgroundTransparency = 1
+	row.Name = name
 
 	local label = Instance.new("TextLabel", row)
-	label.Size = UDim2.new(0.45,0,1,0)
+	label.Size = UDim2.new(0.42,0,1,0)
 	label.BackgroundTransparency = 1
-	label.Text = text
+	label.Text = name
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Font = Enum.Font.GothamBold
 	label.TextSize = 14
 	label.TextColor3 = Color3.new(1,1,1)
 
-	local keyBtn = Instance.new("TextButton", row)
-	keyBtn.Size = UDim2.new(0,50,0,22)
-	keyBtn.Position = UDim2.new(0.55,0,0.5,-11)
-	keyBtn.Text = "None"
-	keyBtn.Font = Enum.Font.Gotham
-	keyBtn.TextSize = 12
-	keyBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-	keyBtn.TextColor3 = Color3.new(1,1,1)
-	Instance.new("UICorner", keyBtn).CornerRadius = UDim.new(0,6)
+	local keyBtn
+	if allowKeybind then
+		keyBtn = Instance.new("TextButton", row)
+		keyBtn.Size = UDim2.new(0,48,0,22)
+		keyBtn.Position = UDim2.new(0.44,0,0.5,-11)
+		keyBtn.Text = "None"
+		keyBtn.Font = Enum.Font.Gotham
+		keyBtn.TextSize = 12
+		keyBtn.BackgroundColor3 = Color3.fromRGB(18,18,18)
+		keyBtn.TextColor3 = Color3.new(1,1,1)
+		Instance.new("UICorner", keyBtn).CornerRadius = UDim.new(0,6)
+	end
 
 	local toggleBg = Instance.new("Frame", row)
 	toggleBg.Size = UDim2.new(0,42,0,22)
-	toggleBg.Position = UDim2.new(1,-50,0.5,-11)
-	toggleBg.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	toggleBg.Position = UDim2.new(allowKeybind and 0.53 or 0.44,0,0.5,-11)
+	toggleBg.BackgroundColor3 = Color3.fromRGB(35,35,35)
 	Instance.new("UICorner", toggleBg).CornerRadius = UDim.new(1,0)
 
 	local knob = Instance.new("Frame", toggleBg)
@@ -144,51 +161,152 @@ local function toggleRow(parent, text, callback)
 	knob.BackgroundColor3 = Color3.new(1,1,1)
 	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
 
-	local state = false
+	local enabled = false
 	local function set(v)
-		state = v
-		toggleBg.BackgroundColor3 = v and Color3.fromRGB(0,140,255) or Color3.fromRGB(60,60,60)
+		enabled = v
+		toggleBg.BackgroundColor3 = v and Color3.fromRGB(0,120,255) or Color3.fromRGB(35,35,35)
 		knob.Position = v and UDim2.new(1,-20,0.5,-9) or UDim2.new(0,2,0.5,-9)
 		callback(v)
 	end
 
-	toggleBg.InputBegan:Connect(function()
-		set(not state)
+	toggleBg.InputBegan:Connect(function(i)
+		if i.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+		set(not enabled)
 	end)
 
-	keyBtn.MouseButton1Click:Connect(function()
-		keyBtn.Text = "..."
-		local conn
-		conn = UIS.InputBegan:Connect(function(i)
-			if i.KeyCode then
-				keyBtn.Text = i.KeyCode.Name
-				keybinds[text] = {Key=i.KeyCode, Toggle=function() set(not state) end}
-				conn:Disconnect()
-			end
+	if allowKeybind then
+		keyBtn.MouseButton1Click:Connect(function()
+			keyBtn.Text = "..."
+			local c; c = UIS.InputBegan:Connect(function(i)
+				if i.KeyCode then
+					keyBtn.Text = i.KeyCode.Name
+					keybinds[name] = {Key=i.KeyCode, Toggle=function() set(not enabled) end}
+					c:Disconnect()
+				end
+			end)
 		end)
+	end
+end
+
+-- ===== FEATURES =====
+
+-- WALK SPEED
+do
+	local row = Instance.new("Frame", SecMain)
+	row.Size = UDim2.new(1,0,0,30)
+	row.BackgroundTransparency = 1
+
+	local l = Instance.new("TextLabel", row)
+	l.Size = UDim2.new(0.42,0,1,0)
+	l.BackgroundTransparency = 1
+	l.Text = "Walk Speed"
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Font = Enum.Font.GothamBold
+	l.TextSize = 14
+	l.TextColor3 = Color3.new(1,1,1)
+
+	local box = Instance.new("TextBox", row)
+	box.Size = UDim2.new(0,60,1,0)
+	box.Position = UDim2.new(0.44,0,0,0)
+	box.PlaceholderText = "16"
+	box.BackgroundColor3 = Color3.fromRGB(18,18,18)
+	box.TextColor3 = Color3.new(1,1,1)
+	box.Font = Enum.Font.Gotham
+	box.TextSize = 14
+
+	local apply = Instance.new("TextButton", row)
+	apply.Size = UDim2.new(0,50,1,0)
+	apply.Position = UDim2.new(0.55,0,0,0)
+	apply.Text = "Apply"
+	apply.BackgroundColor3 = Color3.fromRGB(0,120,255)
+	apply.TextColor3 = Color3.new(1,1,1)
+	apply.Font = Enum.Font.GothamBold
+	apply.TextSize = 13
+
+	apply.MouseButton1Click:Connect(function()
+		local v = tonumber(box.Text)
+		if v and plr.Character then
+			plr.Character.Humanoid.WalkSpeed = v
+		end
 	end)
 end
 
--- === FEATURES ===
+-- FLIGHT (speed box)
+do
+	local flying=false
+	local bv
 
--- CLICK TP
-toggleRow(MainSec,"Click TP",function(v)
+	local row = Instance.new("Frame", SecMain)
+	row.Size = UDim2.new(1,0,0,30)
+	row.BackgroundTransparency = 1
+
+	local l = Instance.new("TextLabel", row)
+	l.Size = UDim2.new(0.42,0,1,0)
+	l.BackgroundTransparency = 1
+	l.Text = "Flight"
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Font = Enum.Font.GothamBold
+	l.TextSize = 14
+	l.TextColor3 = Color3.new(1,1,1)
+
+	local speedBox = Instance.new("TextBox", row)
+	speedBox.Size = UDim2.new(0,60,1,0)
+	speedBox.Position = UDim2.new(0.44,0,0,0)
+	speedBox.PlaceholderText = "50"
+	speedBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
+	speedBox.TextColor3 = Color3.new(1,1,1)
+	speedBox.Font = Enum.Font.Gotham
+	speedBox.TextSize = 14
+
+	local toggle = Instance.new("TextButton", row)
+	toggle.Size = UDim2.new(0,50,1,0)
+	toggle.Position = UDim2.new(0.55,0,0,0)
+	toggle.Text = "Toggle"
+	toggle.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	toggle.TextColor3 = Color3.new(1,1,1)
+	toggle.Font = Enum.Font.GothamBold
+	toggle.TextSize = 13
+
+	toggle.MouseButton1Click:Connect(function()
+		flying = not flying
+		if not flying and bv then bv:Destroy() bv=nil end
+	end)
+
 	RunService.RenderStepped:Connect(function()
-		if v and UIS:IsKeyDown(Enum.KeyCode.LeftControl)
-		and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
-		and plr.Character then
+		if flying and plr.Character then
 			local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
 			if hrp then
-				local ray = workspace.CurrentCamera:ScreenPointToRay(
-					UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y)
-				hrp.CFrame = CFrame.new(ray.Origin + ray.Direction * 100)
+				if not bv then
+					bv = Instance.new("BodyVelocity", hrp)
+					bv.MaxForce = Vector3.new(1e6,1e6,1e6)
+				end
+				local spd = tonumber(speedBox.Text) or 50
+				local cam = workspace.CurrentCamera
+				local dir = Vector3.zero
+				if UIS:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
+				if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
+				if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
+				if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
+				bv.Velocity = dir * spd
 			end
+		end
+	end)
+end
+
+-- CLICK TP
+toggleRow(SecMain,"Click TP",true,function(v)
+	RunService.RenderStepped:Connect(function()
+		if v and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and plr.Character then
+			local hrp = plr.Character.HumanoidRootPart
+			local ray = workspace.CurrentCamera:ScreenPointToRay(
+				UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y)
+			hrp.CFrame = CFrame.new(ray.Origin + ray.Direction*100)
 		end
 	end)
 end)
 
 -- INFINITE JUMP
-toggleRow(MainSec,"Infinite Jump",function(v)
+toggleRow(SecMain,"Infinite Jump",true,function(v)
 	UIS.JumpRequest:Connect(function()
 		if v and plr.Character then
 			plr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
@@ -197,35 +315,158 @@ toggleRow(MainSec,"Infinite Jump",function(v)
 end)
 
 -- NOCLIP
-toggleRow(MainSec,"Noclip",function(v)
+toggleRow(SecMain,"Noclip",true,function(v)
 	RunService.Stepped:Connect(function()
 		if v and plr.Character then
-			for _,p in pairs(plr.Character:GetChildren()) do
-				if p:IsA("BasePart") then p.CanCollide = false end
+			for _,p in ipairs(plr.Character:GetChildren()) do
+				if p:IsA("BasePart") then p.CanCollide=false end
 			end
 		end
 	end)
 end)
 
--- AUTO BIRDKILL
-toggleRow(OpSec,"Auto BirdKill",function(v)
-	if not v then return end
-	task.spawn(function()
-		local r = game.ReplicatedStorage.RS.Remotes.Misc.BirdKill
-		while v do r:FireServer("Eagle") task.wait(1) end
-	end)
-end)
-
 -- AUTO WASH
-toggleRow(OpSec,"Auto Wash",function(v)
-	if not v then return end
+toggleRow(SecOP,"Auto Wash",true,function(v)
 	task.spawn(function()
 		local r = game.ReplicatedStorage.RS.Remotes.Boats.Wash
 		while v do r:FireServer() task.wait(2) end
 	end)
 end)
 
--- CHEST ESP
-toggleRow(MiscSec,"Chest ESP",function(v)
-	-- simplified ESP toggle
+-- AUTO BIRDKILL
+toggleRow(SecOP,"Auto BirdKill",true,function(v)
+	task.spawn(function()
+		local r = game.ReplicatedStorage.RS.Remotes.Misc.BirdKill
+		while v do r:FireServer("Eagle") task.wait(1) end
+	end)
 end)
+
+-- REMOVE INSANITY
+do
+	local row = Instance.new("TextButton", SecMisc)
+	row.Size = UDim2.new(1,0,0,30)
+	row.Text = "Remove Insanity"
+	row.Font = Enum.Font.GothamBold
+	row.TextSize = 14
+	row.TextColor3 = Color3.new(1,1,1)
+	row.BackgroundColor3 = Color3.fromRGB(20,20,20)
+	row.MouseButton1Click:Connect(function()
+		local t = plr.PlayerGui:FindFirstChild("Temp")
+		if t and t:FindFirstChild("Insanity") then t.Insanity:Destroy() end
+	end)
+end
+
+-- REMOVE FOG
+do
+	local row = Instance.new("TextButton", SecMisc)
+	row.Size = UDim2.new(1,0,0,30)
+	row.Text = "Remove Fog"
+	row.Font = Enum.Font.GothamBold
+	row.TextSize = 14
+	row.TextColor3 = Color3.new(1,1,1)
+	row.BackgroundColor3 = Color3.fromRGB(20,20,20)
+	row.MouseButton1Click:Connect(function()
+		local t = plr.PlayerGui:FindFirstChild("Temp")
+		if t and t:FindFirstChild("FogParticles") then t.FogParticles:Destroy() end
+	end)
+end
+
+toggleRow(SecOP, "Auto Wash", true, function(enabled)
+	task.spawn(function()
+		local remote = game.ReplicatedStorage
+			:WaitForChild("RS")
+			:WaitForChild("Remotes")
+			:WaitForChild("Boats")
+			:WaitForChild("Wash")
+
+		while enabled do
+			remote:FireServer()
+			task.wait(2)
+		end
+	end)
+end)
+
+toggleRow(SecOP, "Auto BirdKill", true, function(enabled)
+	task.spawn(function()
+		local remote = game.ReplicatedStorage
+			:WaitForChild("RS")
+			:WaitForChild("Remotes")
+			:WaitForChild("Misc")
+			:WaitForChild("BirdKill")
+
+		while enabled do
+			remote:FireServer("Eagle")
+			task.wait(1)
+		end
+	end)
+end)
+
+do
+	local enabled = false
+	local esp = {}
+
+	local CHESTS = {
+		["Treasure Chest"]  = Color3.fromRGB(255,255,255),
+		["Uncommon Chest"]  = Color3.fromRGB(255,255,255),
+		["Rare Chest"]      = Color3.fromRGB(120,180,255), -- light blue
+		["Mystic Chest"]    = Color3.fromRGB(255,0,0),     -- red
+		["Legendary Chest"] = Color3.fromRGB(0,255,0),     -- green
+	}
+
+	local function clear()
+		for _,g in pairs(esp) do
+			if g then g:Destroy() end
+		end
+		table.clear(esp)
+	end
+
+	toggleRow(SecMisc, "Chest ESP", true, function(v)
+		enabled = v
+		if not v then clear() end
+	end)
+
+	task.spawn(function()
+		while true do
+			if enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				local hrpPos = plr.Character.HumanoidRootPart.Position
+
+				for _,m in ipairs(workspace:GetDescendants()) do
+					if m:IsA("Model") and CHESTS[m.Name] then
+						local p = m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart")
+						if p then
+							local dist = (p.Position - hrpPos).Magnitude
+
+							if dist <= 2000 then
+								if not esp[m] then
+									local bb = Instance.new("BillboardGui")
+									bb.Name = "ChestESP"
+									bb.Adornee = p
+									bb.Size = UDim2.new(0,100,0,18)
+									bb.StudsOffset = Vector3.new(0,2.5,0)
+									bb.AlwaysOnTop = true
+
+									local t = Instance.new("TextLabel", bb)
+									t.Size = UDim2.new(1,0,1,0)
+									t.BackgroundTransparency = 1
+									t.Text = m.Name
+									t.Font = Enum.Font.GothamBold
+									t.TextSize = 13
+									t.TextStrokeTransparency = 0.3
+									t.TextColor3 = CHESTS[m.Name]
+
+									bb.Parent = m
+									esp[m] = bb
+								end
+							elseif esp[m] then
+								esp[m]:Destroy()
+								esp[m] = nil
+							end
+						end
+					end
+				end
+			end
+			task.wait(1)
+		end
+	end)
+end
+
