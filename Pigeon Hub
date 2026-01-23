@@ -170,6 +170,8 @@ local function createLabelWithCheckbox(parent, text)
 	return checkbox
 end
 
+
+
 local GeneralStuff = createTab("GENERAL", UDim2.new(0, padding, 0, padding))
 local GoodStuff    = createTab("GOOD STUFF", UDim2.new(1/3, padding, 0, padding))
 local MiscStuff    = createTab("MISC", UDim2.new(2/3, padding, 0, padding))
@@ -229,6 +231,80 @@ local function selectTab(tab)
 	end
 
 	tab.TextColor3 = Color3.fromRGB(0,255,255)
+end
+
+local function createToggleRow(parent, text)
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, 0, 0, buttonHeight)
+	row.BackgroundTransparency = 1
+	row.Parent = parent
+
+	-- Label
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0.55, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextXAlignment = Left
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 14
+	label.TextColor3 = Color3.new(1,1,1)
+	label.Parent = row
+
+	-- Keybind display
+	local keybind = Instance.new("TextButton")
+	keybind.Size = UDim2.new(0, 50, 0, 22)
+	keybind.Position = UDim2.new(0.6, 0, 0.5, -11)
+	keybind.Text = "None"
+	keybind.Font = Enum.Font.Gotham
+	keybind.TextSize = 12
+	keybind.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	keybind.TextColor3 = Color3.new(1,1,1)
+	keybind.Parent = row
+
+	-- Toggle background
+	local toggle = Instance.new("Frame")
+	toggle.Size = UDim2.new(0, 42, 0, 22)
+	toggle.Position = UDim2.new(1, -50, 0.5, -11)
+	toggle.BackgroundColor3 = Color3.fromRGB(60,60,60)
+	toggle.Parent = row
+
+	Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
+
+	-- Knob
+	local knob = Instance.new("Frame")
+	knob.Size = UDim2.new(0, 18, 0, 18)
+	knob.Position = UDim2.new(0, 2, 0.5, -9)
+	knob.BackgroundColor3 = Color3.new(1,1,1)
+	knob.Parent = toggle
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+
+	return {
+		Row = row,
+		Toggle = toggle,
+		Knob = knob,
+		Keybind = keybind
+	}
+end
+
+local function createRemoveRow(parent, text, callback)
+	local row = Instance.new("Frame", parent)
+	row.Size = UDim2.new(1,0,0,buttonHeight)
+	row.BackgroundTransparency = 1
+
+	local label = Instance.new("TextLabel", row)
+	label.Size = UDim2.new(0.6,0,1,0)
+	label.Text = text
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1,1,1)
+	label.Font = Enum.Font.GothamBold
+
+	local btn = Instance.new("TextButton", row)
+	btn.Size = UDim2.new(0,80,0,24)
+	btn.Position = UDim2.new(1,-85,0.5,-12)
+	btn.Text = "Remove"
+	btn.BackgroundColor3 = Color3.fromRGB(70,70,70)
+
+	btn.MouseButton1Click:Connect(callback)
 end
 
 GeneralStuff.MouseButton1Click:Connect(function() selectTab(GeneralStuff) end)
@@ -411,15 +487,12 @@ RemoveLabel.Font = Enum.Font.GothamBold
 RemoveLabel.TextSize = 14
 RemoveLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local RemoveBtn = Instance.new("TextButton")
-RemoveBtn.Parent = GeneralSection
-RemoveBtn.Size = UDim2.new(0,80,0,buttonHeight)
-RemoveBtn.Text = "Remove"
-RemoveBtn.TextColor3 = Color3.fromRGB(255,255,255)
-RemoveBtn.Font = Enum.Font.GothamBold
-RemoveBtn.TextSize = 14
-RemoveBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-RemoveBtn.BorderColor3 = Color3.fromRGB(128,0,128)
+createRemoveRow(GeneralSection, "Remove Insanity", function()
+	local temp = plr.PlayerGui:FindFirstChild("Temp")
+	if temp and temp:FindFirstChild("Insanity") then
+		temp.Insanity:Destroy()
+	end
+end)
 
 RemoveBtn.MouseButton1Click:Connect(function()
 	local insanityScript = plr.PlayerGui:FindFirstChild("Temp")
@@ -440,15 +513,12 @@ RemoveFogLabel.Font = Enum.Font.GothamBold
 RemoveFogLabel.TextSize = 14
 RemoveFogLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local RemoveFogBtn = Instance.new("TextButton")
-RemoveFogBtn.Parent = GeneralSection
-RemoveFogBtn.Size = UDim2.new(0,80,0,buttonHeight)
-RemoveFogBtn.Text = "Remove"
-RemoveFogBtn.TextColor3 = Color3.fromRGB(255,255,255)
-RemoveFogBtn.Font = Enum.Font.GothamBold
-RemoveFogBtn.TextSize = 14
-RemoveFogBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-RemoveFogBtn.BorderColor3 = Color3.fromRGB(128,0,128)
+createRemoveRow(GeneralSection, "Remove Fog", function()
+	local temp = plr.PlayerGui:FindFirstChild("Temp")
+	if temp and temp:FindFirstChild("FogParticles") then
+		temp.FogParticles:Destroy()
+	end
+end)
 
 RemoveFogBtn.MouseButton1Click:Connect(function()
 	local tempFolder = plr.PlayerGui:FindFirstChild("Temp")
