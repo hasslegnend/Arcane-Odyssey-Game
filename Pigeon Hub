@@ -3,46 +3,118 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local plr = Players.LocalPlayer
-local PlayerGui = plr:WaitForChild("PlayerGui")
 
 -- CONSTANTS
 local ROW_HEIGHT = 30
 local FONT = Enum.Font.GothamBold
 
 -- GUI
-local Gui = Instance.new("ScreenGui", PlayerGui)
+local Gui = Instance.new("ScreenGui", plr.PlayerGui)
 Gui.Name = "PigeonGui"
 
 local Main = Instance.new("Frame", Gui)
-Main.Size = UDim2.new(0, 480, 0, 650)
+Main.Size = UDim2.new(0, 520, 0, 520) -- square
 Main.Position = UDim2.new(0.5,0,0.5,0)
 Main.AnchorPoint = Vector2.new(0.5,0.5)
-Main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Main.BackgroundColor3 = Color3.fromRGB(18,18,18)
 Main.Active = true
 Main.Draggable = true
 
--- SECTION
-local Section = Instance.new("ScrollingFrame", Main)
-Section.Position = UDim2.new(0,10,0,50)
-Section.Size = UDim2.new(1,-20,1,-60)
-Section.AutomaticCanvasSize = Enum.AutomaticSize.Y
-Section.ScrollBarThickness = 6
-Section.BackgroundColor3 = Color3.fromRGB(15,15,15)
+-- TOP BAR
+local Top = Instance.new("Frame", Main)
+Top.Size = UDim2.new(1,0,0,40)
+Top.BackgroundColor3 = Color3.fromRGB(25,25,25)
 
-local Layout = Instance.new("UIListLayout", Section)
-Layout.Padding = UDim.new(0,8)
+local Icon = Instance.new("ImageLabel", Top)
+Icon.Size = UDim2.new(0,24,0,24)
+Icon.Position = UDim2.new(0,8,0.5,-12)
+Icon.BackgroundTransparency = 1
+Icon.Image = "" -- empty on purpose
 
--- HELPERS
-local function createRow()
-	local row = Instance.new("Frame", Section)
-	row.Size = UDim2.new(1,0,0,ROW_HEIGHT)
-	row.BackgroundTransparency = 1
-	return row
+local Title = Instance.new("TextLabel", Top)
+Title.Position = UDim2.new(0,40,0,0)
+Title.Size = UDim2.new(1,-40,1,0)
+Title.BackgroundTransparency = 1
+Title.Text = "PigeonHub"
+Title.Font = FONT
+Title.TextSize = 16
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextColor3 = Color3.new(1,1,1)
+
+-- SIDEBAR
+local Sidebar = Instance.new("Frame", Main)
+Sidebar.Position = UDim2.new(0,0,0,40)
+Sidebar.Size = UDim2.new(0,120,1,-40)
+Sidebar.BackgroundColor3 = Color3.fromRGB(22,22,22)
+
+local function sidebarButton(text, y, callback)
+	local b = Instance.new("TextButton", Sidebar)
+	b.Size = UDim2.new(1,0,0,36)
+	b.Position = UDim2.new(0,0,0,y)
+	b.Text = text
+	b.Font = FONT
+	b.TextSize = 14
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	b.MouseButton1Click:Connect(callback)
+	return b
 end
 
-local function createLabel(row, text)
+-- CONTENT HOLDER
+local Content = Instance.new("Frame", Main)
+Content.Position = UDim2.new(0,120,0,40)
+Content.Size = UDim2.new(1,-120,1,-40)
+Content.BackgroundTransparency = 1
+
+local function createSection()
+	local s = Instance.new("ScrollingFrame", Content)
+	s.Size = UDim2.new(1,-20,1,-20)
+	s.Position = UDim2.new(0,10,0,10)
+	s.ScrollBarThickness = 6
+	s.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	s.Visible = false
+	s.BackgroundColor3 = Color3.fromRGB(15,15,15)
+
+	local l = Instance.new("UIListLayout", s)
+	l.Padding = UDim.new(0,8)
+	return s
+end
+
+local MainSection = createSection()
+local OpSection   = createSection()
+local MiscSection = createSection()
+
+MainSection.Visible = true
+
+sidebarButton("Main", 10, function()
+	MainSection.Visible = true
+	OpSection.Visible = false
+	MiscSection.Visible = false
+end)
+
+sidebarButton("OP", 56, function()
+	MainSection.Visible = false
+	OpSection.Visible = true
+	MiscSection.Visible = false
+end)
+
+sidebarButton("Misc", 102, function()
+	MainSection.Visible = false
+	OpSection.Visible = false
+	MiscSection.Visible = true
+end)
+
+-- HELPERS
+local function createRow(parent)
+	local r = Instance.new("Frame", parent)
+	r.Size = UDim2.new(1,0,0,ROW_HEIGHT)
+	r.BackgroundTransparency = 1
+	return r
+end
+
+local function label(row, text)
 	local l = Instance.new("TextLabel", row)
-	l.Size = UDim2.new(0.55,0,1,0)
+	l.Size = UDim2.new(0.5,0,1,0)
 	l.BackgroundTransparency = 1
 	l.Text = text
 	l.Font = FONT
@@ -51,30 +123,7 @@ local function createLabel(row, text)
 	l.TextColor3 = Color3.new(1,1,1)
 end
 
-local function createToggle(row, callback)
-	local bg = Instance.new("Frame", row)
-	bg.Size = UDim2.new(0,44,0,22)
-	bg.Position = UDim2.new(1,-50,0.5,-11)
-	bg.BackgroundColor3 = Color3.fromRGB(60,60,60)
-	Instance.new("UICorner", bg).CornerRadius = UDim.new(1,0)
-
-	local knob = Instance.new("Frame", bg)
-	knob.Size = UDim2.new(0,18,0,18)
-	knob.Position = UDim2.new(0,2,0.5,-9)
-	knob.BackgroundColor3 = Color3.new(1,1,1)
-	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
-
-	local state = false
-	bg.InputBegan:Connect(function(i)
-		if i.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-		state = not state
-		bg.BackgroundColor3 = state and Color3.fromRGB(140,0,255) or Color3.fromRGB(60,60,60)
-		knob.Position = state and UDim2.new(1,-20,0.5,-9) or UDim2.new(0,2,0.5,-9)
-		callback(state)
-	end)
-end
-
-local function createInput(row, x, placeholder)
+local function input(row, x, placeholder)
 	local t = Instance.new("TextBox", row)
 	t.Size = UDim2.new(0,70,1,0)
 	t.Position = UDim2.new(0,x,0,0)
@@ -86,7 +135,7 @@ local function createInput(row, x, placeholder)
 	return t
 end
 
-local function createButton(row, x, text, color, cb)
+local function button(row, x, text, color, cb)
 	local b = Instance.new("TextButton", row)
 	b.Size = UDim2.new(0,70,1,0)
 	b.Position = UDim2.new(0,x,0,0)
@@ -98,32 +147,43 @@ local function createButton(row, x, text, color, cb)
 	b.MouseButton1Click:Connect(cb)
 end
 
--- WALK SPEED
+-- WALK SPEED (MAIN)
 do
-	local row = createRow()
-	createLabel(row, "Walk Speed")
-	local input = createInput(row, 200, "16")
-	createButton(row, 280, "Apply", Color3.fromRGB(0,140,255), function()
-		local v = tonumber(input.Text)
-		if v and plr.Character and plr.Character:FindFirstChild("Humanoid") then
+	local row = createRow(MainSection)
+	label(row, "Walk Speed")
+	local box = input(row, 200, "16")
+
+	button(row, 280, "Apply", Color3.fromRGB(0,140,255), function()
+		local v = tonumber(box.Text)
+		if v and plr.Character then
 			plr.Character.Humanoid.WalkSpeed = v
 		end
 	end)
-	createButton(row, 360, "Reset", Color3.fromRGB(255,60,60), function()
-		if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+
+	button(row, 360, "Reset", Color3.fromRGB(255,60,60), function()
+		if plr.Character then
 			plr.Character.Humanoid.WalkSpeed = 16
 		end
 	end)
 end
 
--- FLIGHT
+-- FLIGHT WITH SAME BOXES (OP)
 do
-	local flying, bv = false, nil
-	local row = createRow()
-	createLabel(row, "Flight")
-	createToggle(row, function(v)
-		flying = v
-		if not v and bv then bv:Destroy() bv = nil end
+	local flying = false
+	local speed = 50
+	local bv
+
+	local row = createRow(OpSection)
+	label(row, "Flight")
+	local box = input(row, 200, "50")
+
+	button(row, 280, "Apply", Color3.fromRGB(0,140,255), function()
+		speed = tonumber(box.Text) or speed
+	end)
+
+	button(row, 360, "Reset", Color3.fromRGB(255,60,60), function()
+		speed = 50
+		box.Text = "50"
 	end)
 
 	RunService.RenderStepped:Connect(function()
@@ -138,7 +198,17 @@ do
 			if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
 			if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
 			if UIS:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
-			bv.Velocity = dir * 50
+			bv.Velocity = dir * speed
+		elseif bv then
+			bv:Destroy()
+			bv = nil
+		end
+	end)
+
+	UIS.InputBegan:Connect(function(i,g)
+		if g then return end
+		if i.KeyCode == Enum.KeyCode.F then
+			flying = not flying
 		end
 	end)
 end
