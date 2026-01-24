@@ -16,5 +16,25 @@ Main.Active = true
 Main.Draggable = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0,14)
 
+UIS.InputBegan:Connect(function(i,gp)
+	if gp then return end
+	if i.KeyCode == Enum.KeyCode.End then
+		Gui.Enabled = not Gui.Enabled
+	end
+end)
 
+local Top = Instance.new("Frame", Main)
+Top.Size = UDim2.new(1,0,0,44)
+Top.BackgroundColor3 = Color3.fromRGB(12,12,12)
+Instance.new("UICorner", Top).CornerRadius = UDim.new(0,14)
+
+local Title = Instance.new("TextLabel", Top)
+Title.Position = UDim2.new(0,48,0,0)
+Title.Size = UDim2.new(1,-48,1,0)
+Title.BackgroundTransparency = 1
+Title.Text = "PigeonHub"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextColor3 = Color3.new(1,1,1)
 
