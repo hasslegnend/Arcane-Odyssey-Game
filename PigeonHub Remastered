@@ -40,6 +40,40 @@ Title.TextColor3 = Color3.new(1,1,1)
 
 local Search = Instance.new("TextBox", Top)
 Search.Size = UDim2.new(0,180,0,24)
+
+local activeBtn
+local function sideBtn(txt, y, sec)
+	local b = Instance.new("TextButton", Sidebar)
+	b.Size = UDim2.new(1,-20,0,36)
+	b.Position = UDim2.new(0,10,0,y)
+	b.Text = txt
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundTransparency = 1
+
+	b.MouseButton1Click:Connect(function()
+		SecMain.Visible, SecOP.Visible, SecMisc.Visible = false,false,false
+		sec.Visible = true
+		if activeBtn then activeBtn.BackgroundTransparency = 1 end
+		b.BackgroundTransparency = 0
+		b.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		activeBtn = b
+	end)
+end
+
+sideBtn("Main", 12, SecMain)
+sideBtn("OP", 56, SecOP)
+sideBtn("Misc", 100, SecMisc)
+
+local keybinds = {}
+UIS.InputBegan:Connect(function(i,gp)
+	if gp then return end
+	for _,v in pairs(keybinds) do
+		if v.Key == i.KeyCode then v.Toggle() end
+	end
+end)
+
 Search.Position = UDim2.new(1,-200,0.5,-12)
 Search.PlaceholderText = "Search..."
 Search.BackgroundColor3 = Color3.fromRGB(16,16,16)
@@ -75,4 +109,37 @@ local SecMain = newSection()
 local SecOP   = newSection()
 local SecMisc = newSection()
 SecMain.Visible = true
+
+
+local function toggleRow(parent, name, allowKeybind, callback)
+	local row = Instance.new("Frame", parent)
+	row.Size = UDim2.new(1,0,0,30)
+	row.BackgroundTransparency = 1
+	row.Name = name
+
+	local label = Instance.new("TextLabel", row)
+	label.Size = UDim2.new(0.42,0,1,0)
+	label.BackgroundTransparency = 1
+	label.Text = name
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 14
+	label.TextColor3 = Color3.new(1,1,1)
+
+	local keyBtn
+	if allowKeybind then
+		keyBtn = Instance.new("TextButton", row)
+		keyBtn.Size = UDim2.new(0,48,0,22)
+		keyBtn.Position = UDim2.new(0.44,0,0.5,-11)
+		keyBtn.Text = "None"
+		keyBtn.Font = Enum.Font.Gotham
+		keyBtn.TextSize = 12
+		keyBtn.BackgroundColor3 = Color3.fromRGB(18,18,18)
+		keyBtn.TextColor3 = Color3.new(1,1,1)
+		Instance.new("UICorner", keyBtn).CornerRadius = UDim.new(0,6)
+	end
+
+
+
+
 
