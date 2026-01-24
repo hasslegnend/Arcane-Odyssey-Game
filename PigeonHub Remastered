@@ -38,3 +38,41 @@ Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.TextColor3 = Color3.new(1,1,1)
 
+local Search = Instance.new("TextBox", Top)
+Search.Size = UDim2.new(0,180,0,24)
+Search.Position = UDim2.new(1,-200,0.5,-12)
+Search.PlaceholderText = "Search..."
+Search.BackgroundColor3 = Color3.fromRGB(16,16,16)
+Search.TextColor3 = Color3.new(1,1,1)
+Search.Font = Enum.Font.Gotham
+Search.TextSize = 13
+Instance.new("UICorner", Search).CornerRadius = UDim.new(0,6)
+
+local Sidebar = Instance.new("Frame", Main)
+Sidebar.Position = UDim2.new(0,0,0,44)
+Sidebar.Size = UDim2.new(0,150,1,-44)
+Sidebar.BackgroundColor3 = Color3.fromRGB(10,10,10)
+
+local Content = Instance.new("Frame", Main)
+Content.Position = UDim2.new(0,150,0,44)
+Content.Size = UDim2.new(1,-150,1,-44)
+Content.BackgroundTransparency = 1
+
+ocal function newSection()
+	local s = Instance.new("ScrollingFrame", Content)
+	s.Size = UDim2.new(1,-16,1,-16)
+	s.Position = UDim2.new(0,8,0,8)
+	s.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	s.ScrollBarThickness = 6
+	s.BackgroundColor3 = Color3.fromRGB(10,10,10)
+	s.Visible = false
+	Instance.new("UICorner", s).CornerRadius = UDim.new(0,10)
+	Instance.new("UIListLayout", s).Padding = UDim.new(0,8)
+	return s
+end
+
+local SecMain = newSection()
+local SecOP   = newSection()
+local SecMisc = newSection()
+SecMain.Visible = true
+
